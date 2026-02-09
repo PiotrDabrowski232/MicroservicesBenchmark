@@ -1,0 +1,110 @@
+version: '3.8'
+services:
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - thesis-net
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    container_name: kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:29093
+      
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:29093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      
+      CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM2Qk'
+      
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      
+    networks:
+      - thesis-net
+    healthcheck:
+      test: ["CMD", "kafka-topics", "--list", "--bootstrap-server", "localhost:9092"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+  order-service:
+    image: microservices-benchmark/order-service:latest
+    build:
+      context: ../ 
+      dockerfile: src/Services/OrderService/Dockerfile
+    container_name: order-service
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__RabbitMq=amqp://guest:guest@rabbitmq:5672
+      - ConnectionStrings__Kafka=kafka:9092
+    ports:
+      - "5001:8080"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    networks:
+      - thesis-net
+
+  inventory-service:
+    image: microservices-benchmark/inventory-service:latest
+    build:
+      context: ../
+      dockerfile: src/Services/InventoryService/Dockerfile
+    container_name: inventory-service
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__RabbitMq=amqp://guest:guest@rabbitmq:5672
+      - ConnectionStrings__Kafka=kafka:9092
+    ports:
+      - "5002:8080"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    networks:
+      - thesis-net
+
+  payment-service:
+    image: microservices-benchmark/payment-service:latest
+    build:
+      context: ../
+      dockerfile: src/Services/PaymentService/Dockerfile
+    container_name: payment-service
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__RabbitMq=amqp://guest:guest@rabbitmq:5672
+      - ConnectionStrings__Kafka=kafka:9092
+    ports:
+      - "5003:8080"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    networks:
+      - thesis-net
+
+networks:
+  thesis-net:
+    driver: bridge
