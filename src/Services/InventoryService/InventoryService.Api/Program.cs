@@ -1,8 +1,16 @@
+
+using Observability;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+
 builder.Services.AddOpenApi();
+
+
+builder.Services.WithObservability(
+    builder.Configuration,
+    builder.Environment.ApplicationName);
+
 
 var app = builder.Build();
 
@@ -19,8 +27,10 @@ var summaries = new[]
     "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
 };
 
-app.MapGet("/weatherforecast", () =>
+app.MapGet("/weatherforecast", (ILogger<Program> logger) =>
 {
+    logger.LogInformation("Generating weather forecast");
+
     var forecast =  Enumerable.Range(1, 5).Select(index =>
         new WeatherForecast
         (

@@ -19,12 +19,14 @@ scrape_configs:
         regex: true
         action: keep
 
-      - source_labels: ["__meta_docker_container_name"]
-        target_label: container
+      - source_labels: ["__meta_docker_container_label_service_name"]
+        target_label: service_name
 
-      - source_labels:
-          ["__meta_docker_container_label_com_docker_compose_service"]
+      - source_labels: ["__meta_docker_container_label_service_name"]
         target_label: service
 
-      - source_labels: ["__meta_docker_container_label_env"]
-        target_label: env
+      - source_labels: ["__meta_docker_container_label_tier"]
+        target_label: tier
+
+      - source_labels: ["__meta_docker_container_name"]
+        target_label: container
