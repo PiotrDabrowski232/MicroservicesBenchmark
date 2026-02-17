@@ -98,7 +98,7 @@ services:
       - ConnectionStrings__Kafka=kafka:9092
       - ConnectionStrings__Postgres=Host=db;Port=5432;Database=microDb;Username=microDb_user;Password=microDb_pass
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
-      - OTEL_SERVICE_NAME=inventory-service
+      - OTEL_SERVICE_NAME=order-service
     labels:
       app: "true"
       env: "dev"
@@ -158,7 +158,7 @@ services:
       - ConnectionStrings__Kafka=kafka:9092
       - ConnectionStrings__Postgres=Host=db;Port=5432;Database=microDb;Username=microDb_user;Password=microDb_pass
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
-      - OTEL_SERVICE_NAME=inventory-service
+      - OTEL_SERVICE_NAME=payment-service
     labels:
       app: "true"
       env: "dev"
