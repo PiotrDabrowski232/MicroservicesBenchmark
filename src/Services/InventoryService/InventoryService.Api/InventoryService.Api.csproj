@@ -12,9 +12,14 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\BuildingBlocks\Observability\Observability.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\SharedKernel.Api\SharedKernel.Api.csproj" />
     <ProjectReference Include="..\InventoryService.Application\InventoryService.Application.csproj" />
     <ProjectReference Include="..\InventoryService.Domain\InventoryService.Domain.csproj" />
     <ProjectReference Include="..\InventoryService.Infrastructure\InventoryService.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Controllers\" />
   </ItemGroup>
 
 </Project>
