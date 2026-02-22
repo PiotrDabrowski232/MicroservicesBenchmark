@@ -1,4 +1,5 @@
 using OrderService.Api.Dependencies;
+using OrderService.Api.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +12,7 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.MapControllers();
 

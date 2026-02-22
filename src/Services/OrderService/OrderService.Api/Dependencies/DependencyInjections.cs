@@ -1,5 +1,7 @@
 using Observability;
 
+using OrderService.Api.Middleware;
+
 namespace OrderService.Api.Dependencies
 {
     public static class DependencyInjections
@@ -12,6 +14,9 @@ namespace OrderService.Api.Dependencies
             //Controllers
             services.AddOpenApi();
             services.AddControllers();
+
+            //TransientServices
+            services.AddTransient<ExceptionHandlingMiddleware>();
 
             return services;
         }

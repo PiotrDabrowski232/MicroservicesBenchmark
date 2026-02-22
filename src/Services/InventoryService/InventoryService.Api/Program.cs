@@ -1,13 +1,10 @@
 using InventoryService.Api.Dependencies;
 
+using Microsoft.AspNetCore.Diagnostics;
+
 var builder = WebApplication.CreateBuilder(args);
 
-
-builder.Services.AddOpenApi();
-builder.Services.AddControllers();
-
 builder.Services.WithServices(builder.Configuration, builder.Environment);
-
 
 var app = builder.Build();
 
@@ -16,8 +13,10 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.MapControllers();
+app.UseMiddleware<ExceptionHandlerMiddleware>();
 
 app.UseHttpsRedirection();
+
+app.MapControllers();
 
 app.Run();

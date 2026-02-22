@@ -1,5 +1,7 @@
 using Observability;
 
+using PaymentService.Api.Middlewares;
+
 namespace PaymentService.Api.Dependencies
 {
     public static class DependencyInjections
@@ -12,6 +14,9 @@ namespace PaymentService.Api.Dependencies
             //Controllers
             services.AddOpenApi();
             services.AddControllers();
+
+            //TransientServices
+            services.AddTransient<ExceptionHandlingMiddleware>();
 
             return services;
         }

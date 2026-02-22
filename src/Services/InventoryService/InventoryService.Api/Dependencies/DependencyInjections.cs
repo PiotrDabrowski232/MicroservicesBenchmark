@@ -1,3 +1,4 @@
+using InventoryService.Api.Middlewares;
 using Observability;
 
 namespace InventoryService.Api.Dependencies
@@ -12,6 +13,9 @@ namespace InventoryService.Api.Dependencies
             //Controllers
             services.AddOpenApi();
             services.AddControllers();
+
+            //TransientServices
+            services.AddTransient<ExceptionHandlingMiddleware>();
 
             return services;
         }
