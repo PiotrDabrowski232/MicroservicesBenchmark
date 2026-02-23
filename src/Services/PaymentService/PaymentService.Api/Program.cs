@@ -1,6 +1,15 @@
+using PaymentService.Api.Dependencies;
 using PaymentService.Api.Middlewares;
+using PaymentService.Infrastructure.Dependencies;
 
 var builder = WebApplication.CreateBuilder(args);
+
+
+//Services injections
+builder.Services.WithServices(builder.Configuration, builder.Environment);
+builder.Services.InjectInfrastructure(builder.Configuration);
+
+
 
 var app = builder.Build();
 

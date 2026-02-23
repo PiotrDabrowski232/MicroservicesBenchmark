@@ -1,10 +1,15 @@
 using OrderService.Api.Dependencies;
 using OrderService.Api.Middleware;
+using OrderService.Infrastructure.Dependencies;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services
-    .WithServices(builder.Configuration, builder.Environment);
+
+//Services injections
+builder.Services.WithServices(builder.Configuration, builder.Environment);
+builder.Services.InjectInfrastructure(builder.Configuration);
+
+
 
 var app = builder.Build();
 
