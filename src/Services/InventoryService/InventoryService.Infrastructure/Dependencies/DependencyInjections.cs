@@ -1,6 +1,8 @@
+using InventoryService.Infrastructure.Database;
+
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.EntityFrameworkCore;
 
 namespace InventoryService.Infrastructure.Dependencies
 {
@@ -9,7 +11,11 @@ namespace InventoryService.Infrastructure.Dependencies
         public static IServiceCollection InjectInfrastructure(this IServiceCollection services, IConfiguration config)
         {
             var connectionstring = config.GetConnectionString("Postgres");
-            services.AddDbContext<Database.ApplicationDBContext>(options => options.UseNpgsql(connectionstring));
+            services.AddDbContext<ApplicationDBContext>(options =>
+            {
+                options.UseNpgsql(connectionstring);
+                options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+            });
 
             return services;
         }
