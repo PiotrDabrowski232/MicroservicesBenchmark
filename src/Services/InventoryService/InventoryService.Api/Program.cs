@@ -2,6 +2,10 @@ using InventoryService.Infrastructure.Data;
 
 using Microsoft.EntityFrameworkCore;
 
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
+
 var builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -14,6 +18,26 @@ builder.Services.AddDbContext<InventoryDbContext>(options =>
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
+
+var serviceName = "InventoryService";
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(resource => resource.AddService(serviceName))
+    .WithTracing(tracing =>
+    {
+        tracing
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation()
+            .AddEntityFrameworkCoreInstrumentation()
+            .AddOtlpExporter(opts => opts.Endpoint = new Uri("http://jaeger:4317"));
+    })
+    .WithMetrics(metrics =>
+    {
+        metrics
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation()
+            .AddRuntimeInstrumentation()
+            .AddPrometheusExporter();
+    });
 
 var app = builder.Build();
 
@@ -42,5 +66,6 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.MapControllers();
+app.MapPrometheusScrapingEndpoint();
 
 app.Run();

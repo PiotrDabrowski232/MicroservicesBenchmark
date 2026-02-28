@@ -1,5 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
+
 using PaymentService.Infrastructure.Data;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,6 +18,31 @@ builder.Services.AddDbContext<PaymentDbContext>(options =>
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
+
+var serviceName = "PaymentService";
+
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(resource => resource.AddService(serviceName))
+    .WithTracing(tracing =>
+    {
+        tracing
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation()
+            .AddEntityFrameworkCoreInstrumentation()
+            .AddOtlpExporter(opts =>
+            {
+                opts.Endpoint = new Uri("http://jaeger:4317");
+            });
+    })
+    .WithMetrics(metrics =>
+    {
+        metrics
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation()
+            .AddRuntimeInstrumentation()
+            .AddPrometheusExporter();
+    });
+
 
 var app = builder.Build();
 
@@ -39,5 +68,5 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.MapControllers();
-
+app.MapPrometheusScrapingEndpoint();
 app.Run();
