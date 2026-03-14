@@ -13,7 +13,7 @@ public class GrpcPaymentClient : IPaymentClient
 
     public GrpcPaymentClient(IConfiguration configuration)
     {
-        var address = configuration["GrpcUrls:InventoryService"] ?? "http://payment-service:8080";
+        var address = configuration["GrpcUrls:PaymentService"] ?? "http://payment-service:5005";
 
         var httpHandler = new SocketsHttpHandler
         {

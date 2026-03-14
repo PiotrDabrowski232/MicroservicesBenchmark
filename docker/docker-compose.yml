@@ -143,7 +143,7 @@ services:
       - ConnectionStrings__Kafka=kafka:9092
       - ConnectionStrings__DefaultConnection=Server=mysql;Port=3306;Database=InventoryDb;Uid=root;Pwd=rootpassword;
     ports:
-      - "5002:8080"
+      - "5002:5002"
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -166,7 +166,7 @@ services:
       - ConnectionStrings__Kafka=kafka:9092
       - ConnectionStrings__DefaultConnection=Server=mysql;Port=3306;Database=PaymentDb;Uid=root;Pwd=rootpassword;
     ports:
-      - "5003:8080"
+      - "5004:5004"
     depends_on:
       rabbitmq:
         condition: service_healthy

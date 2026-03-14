@@ -13,7 +13,7 @@ public class GrpcInventoryClient : IInventoryClient
 
     public GrpcInventoryClient(IConfiguration configuration)
     {
-        var address = configuration["GrpcUrls:InventoryService"] ?? "http://inventory-service:8080";
+        var address = configuration["GrpcUrls:InventoryService"] ?? "http://inventory-service:5003";
 
         var httpHandler = new SocketsHttpHandler
         {
