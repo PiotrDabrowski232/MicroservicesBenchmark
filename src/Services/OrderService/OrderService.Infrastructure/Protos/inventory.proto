@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+option csharp_namespace = "OrderService.Infrastructure.Protos";
+
+package inventory;
+
+service Inventory {
+  rpc ReserveProduct (ReserveRequestMessage) returns (ReserveResponseMessage);
+}
+
+message ReserveRequestMessage {
+  string productId = 1;
+  int32 quantity = 2;
+}
+
+message ReserveResponseMessage {
+  bool success = 1;
+  string errorMessage = 2;
+}

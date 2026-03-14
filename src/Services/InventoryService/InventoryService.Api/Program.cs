@@ -1,5 +1,10 @@
+using InventoryService.Api.GrpcServices;
+using InventoryService.Application.Commands;
+using InventoryService.Application.Interfaces;
 using InventoryService.Infrastructure.Data;
+using InventoryService.Infrastructure.Repositories;
 
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 
 using OpenTelemetry.Metrics;
@@ -7,6 +12,13 @@ using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ConfigureEndpointDefaults(listenOptions =>
+    {
+        listenOptions.Protocols = HttpProtocols.Http1AndHttp2;
+    });
+});
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
@@ -17,7 +29,13 @@ builder.Services.AddDbContext<InventoryDbContext>(options =>
 });
 
 builder.Services.AddControllers();
+builder.Services.AddGrpc();
 builder.Services.AddOpenApi();
+
+builder.Services.AddMediatR(cfg =>
+    cfg.RegisterServicesFromAssembly(typeof(ReserveProductCommand).Assembly));
+
+builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
 
 var serviceName = "InventoryService";
 builder.Services.AddOpenTelemetry()
@@ -64,8 +82,9 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 app.MapControllers();
+app.MapGrpcService<InventoryGrpcService>();
 app.MapPrometheusScrapingEndpoint();
 
 app.Run();

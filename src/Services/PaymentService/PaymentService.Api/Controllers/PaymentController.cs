@@ -1,7 +1,8 @@
+using MediatR;
+
 using Microsoft.AspNetCore.Mvc;
 
-using PaymentService.Domain.Entities;
-using PaymentService.Infrastructure.Data;
+using PaymentService.Application.Commands;
 
 namespace PaymentService.Api.Controllers;
 
@@ -9,31 +10,21 @@ namespace PaymentService.Api.Controllers;
 [Route("api/[controller]")]
 public class PaymentController : ControllerBase
 {
-    private readonly PaymentDbContext _dbContext;
+    private readonly IMediator _mediator;
 
-    public PaymentController(PaymentDbContext dbContext)
+    public PaymentController(IMediator mediator)
     {
-        _dbContext = dbContext;
+        _mediator = mediator;
     }
 
     [HttpPost("charge")]
     public async Task<IActionResult> Charge([FromBody] ChargeRequest request)
     {
-        await Task.Delay(300);
+        var command = new ChargeCommand(request.OrderId, request.Amount);
 
-        var transaction = new TransactionRecord
-        {
-            Id = Guid.NewGuid(),
-            OrderId = request.OrderId,
-            Amount = request.Amount,
-            Status = "Success",
-            CreatedAt = DateTime.UtcNow
-        };
+        var transactionId = await _mediator.Send(command);
 
-        _dbContext.Transactions.Add(transaction);
-        await _dbContext.SaveChangesAsync();
-
-        return Ok(new { Success = true, TransactionId = transaction.Id.ToString() });
+        return Ok(new { Success = true, TransactionId = transactionId });
     }
 }
 

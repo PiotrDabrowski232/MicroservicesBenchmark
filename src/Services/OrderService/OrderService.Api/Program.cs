@@ -27,15 +27,21 @@ builder.Services.AddMediatR(cfg =>
 
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 
-builder.Services.AddHttpClient<IInventoryClient, HttpInventoryClient>(client =>
-{
-    client.BaseAddress = new Uri("http://inventory-service:8080");
-});
+// REST REGISTRATION
+//builder.Services.AddHttpClient<IInventoryClient, HttpInventoryClient>(client =>
+//{
+//    client.BaseAddress = new Uri("http://inventory-service:8080");
+//});
 
-builder.Services.AddHttpClient<IPaymentClient, HttpPaymentClient>(client =>
-{
-    client.BaseAddress = new Uri("http://payment-service:8080");
-});
+// gRPC REGISTRATION
+builder.Services.AddScoped<IInventoryClient, GrpcInventoryClient>();
+
+// REST REGISTRATION
+//builder.Services.AddHttpClient<IPaymentClient, HttpPaymentClient>(client =>
+//{
+//    client.BaseAddress = new Uri("http://payment-service:8080");
+//});
+builder.Services.AddScoped<IPaymentClient, GrpcPaymentClient>();
 
 var serviceName = "OrderService";
 
@@ -85,7 +91,7 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 app.MapControllers();
 

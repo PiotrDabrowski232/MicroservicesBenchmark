@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+option csharp_namespace = "OrderService.Infrastructure.Protos";
+
+package payment;
+
+service Payment {
+  rpc Charge (ChargeRequestMessage) returns (ChargeResponseMessage);
+}
+
+message ChargeRequestMessage {
+  string orderId = 1;
+  double amount = 2;
+}
+
+message ChargeResponseMessage {
+  bool success = 1;
+  string transactionId = 2;
+}
