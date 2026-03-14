@@ -119,6 +119,13 @@ services:
       - ConnectionStrings__RabbitMq=amqp://guest:guest@rabbitmq:5672
       - ConnectionStrings__Kafka=kafka:9092
       - ConnectionStrings__DefaultConnection=Server=mysql;Port=3306;Database=OrderDb;Uid=root;Pwd=rootpassword;
+      - CommunicationProtocol=gRPC 
+      
+      - GrpcUrls__InventoryService=http://inventory-service:5003
+      - GrpcUrls__PaymentService=http://payment-service:5005
+      
+      - RestUrls__InventoryService=http://inventory-service:5002
+      - RestUrls__PaymentService=http://payment-service:5004
     ports:
       - "5001:8080"
     depends_on:

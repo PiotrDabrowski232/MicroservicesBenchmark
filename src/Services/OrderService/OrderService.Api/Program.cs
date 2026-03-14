@@ -27,21 +27,30 @@ builder.Services.AddMediatR(cfg =>
 
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 
-// REST REGISTRATION
-//builder.Services.AddHttpClient<IInventoryClient, HttpInventoryClient>(client =>
-//{
-//    client.BaseAddress = new Uri("http://inventory-service:8080");
-//});
+var communicationProtocol = builder.Configuration["CommunicationProtocol"] ?? "gRPC";
 
-// gRPC REGISTRATION
-builder.Services.AddScoped<IInventoryClient, GrpcInventoryClient>();
+if (communicationProtocol.Equals("gRPC", StringComparison.OrdinalIgnoreCase))
+{
+    Console.WriteLine("STARTING ORDER SERVICE WITH: gRPC PROTOCOL");
+    builder.Services.AddScoped<IInventoryClient, GrpcInventoryClient>();
+    builder.Services.AddScoped<IPaymentClient, GrpcPaymentClient>();
+}
+else
+{
+    Console.WriteLine("STARTING ORDER SERVICE WITH: REST PROTOCOL");
 
-// REST REGISTRATION
-//builder.Services.AddHttpClient<IPaymentClient, HttpPaymentClient>(client =>
-//{
-//    client.BaseAddress = new Uri("http://payment-service:8080");
-//});
-builder.Services.AddScoped<IPaymentClient, GrpcPaymentClient>();
+    builder.Services.AddHttpClient<IInventoryClient, HttpInventoryClient>(client =>
+    {
+        var address = builder.Configuration["RestUrls:InventoryService"] ?? "http://inventory-service:5002";
+        client.BaseAddress = new Uri(address);
+    });
+
+    builder.Services.AddHttpClient<IPaymentClient, HttpPaymentClient>(client =>
+    {
+        var address = builder.Configuration["RestUrls:PaymentService"] ?? "http://payment-service:5004";
+        client.BaseAddress = new Uri(address);
+    });
+}
 
 var serviceName = "OrderService";
 
