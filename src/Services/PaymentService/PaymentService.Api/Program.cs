@@ -4,9 +4,27 @@ using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
+using PaymentService.Api.GrpcServices;
+using PaymentService.Application.Commands;
+using PaymentService.Application.Interfaces;
 using PaymentService.Infrastructure.Data;
+using PaymentService.Infrastructure.Repositories;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(5004, listenOptions =>
+    {
+        listenOptions.Protocols = HttpProtocols.Http1;
+    });
+
+    options.ListenAnyIP(5005, listenOptions =>
+    {
+        listenOptions.Protocols = HttpProtocols.Http2;
+    });
+});
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
@@ -17,10 +35,15 @@ builder.Services.AddDbContext<PaymentDbContext>(options =>
 });
 
 builder.Services.AddControllers();
+builder.Services.AddGrpc();
 builder.Services.AddOpenApi();
 
-var serviceName = "PaymentService";
+builder.Services.AddMediatR(cfg =>
+    cfg.RegisterServicesFromAssembly(typeof(ChargeCommand).Assembly));
 
+builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
+
+var serviceName = "PaymentService";
 builder.Services.AddOpenTelemetry()
     .ConfigureResource(resource => resource.AddService(serviceName))
     .WithTracing(tracing =>
@@ -29,10 +52,7 @@ builder.Services.AddOpenTelemetry()
             .AddAspNetCoreInstrumentation()
             .AddHttpClientInstrumentation()
             .AddEntityFrameworkCoreInstrumentation()
-            .AddOtlpExporter(opts =>
-            {
-                opts.Endpoint = new Uri("http://jaeger:4317");
-            });
+            .AddOtlpExporter(opts => opts.Endpoint = new Uri("http://jaeger:4317"));
     })
     .WithMetrics(metrics =>
     {
@@ -42,7 +62,6 @@ builder.Services.AddOpenTelemetry()
             .AddRuntimeInstrumentation()
             .AddPrometheusExporter();
     });
-
 
 var app = builder.Build();
 
@@ -66,7 +85,9 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 app.MapControllers();
+app.MapGrpcService<PaymentGrpcService>();
 app.MapPrometheusScrapingEndpoint();
+
 app.Run();

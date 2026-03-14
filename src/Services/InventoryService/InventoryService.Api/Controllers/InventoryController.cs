@@ -1,7 +1,6 @@
-using InventoryService.Infrastructure.Data;
-
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using InventoryService.Application.Commands;
 
 namespace InventoryService.Api.Controllers;
 
@@ -9,30 +8,24 @@ namespace InventoryService.Api.Controllers;
 [Route("api/[controller]")]
 public class InventoryController : ControllerBase
 {
-    private readonly InventoryDbContext _dbContext;
+    private readonly IMediator _mediator;
 
-    public InventoryController(InventoryDbContext dbContext)
+    public InventoryController(IMediator mediator)
     {
-        _dbContext = dbContext;
+        _mediator = mediator;
     }
 
     [HttpPost("reserve")]
     public async Task<IActionResult> ReserveProduct([FromBody] ReserveRequest request)
     {
-        var product = await _dbContext.Products.FirstOrDefaultAsync(p => p.Id == request.ProductId);
+        var command = new ReserveProductCommand(request.ProductId, request.Quantity);
 
-        if (product == null)
+        var isSuccess = await _mediator.Send(command);
+
+        if (!isSuccess)
         {
-            return BadRequest(new { Error = "ProductNotFound" });
+            return BadRequest(new { Error = "Failed to reserve inventory." });
         }
-
-        if (product.StockQuantity < request.Quantity)
-        {
-            return BadRequest(new { Error = "OutOfStock" });
-        }
-
-        product.StockQuantity -= request.Quantity;
-        await _dbContext.SaveChangesAsync();
 
         return Ok(new { Success = true });
     }
