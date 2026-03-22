@@ -1,7 +1,4 @@
-using Grpc.Net.Client;
-
-using Microsoft.Extensions.Configuration;
-
+using OrderService.Application.DTOs;
 using OrderService.Application.Interfaces;
 using OrderService.Infrastructure.Protos;
 
@@ -11,19 +8,9 @@ public class GrpcInventoryClient : IInventoryClient
 {
     private readonly Inventory.InventoryClient _client;
 
-    public GrpcInventoryClient(IConfiguration configuration)
+    public GrpcInventoryClient(Inventory.InventoryClient client)
     {
-        var address = configuration["GrpcUrls:InventoryService"] ?? "http://inventory-service:5003";
-
-        var httpHandler = new SocketsHttpHandler
-        {
-            EnableMultipleHttp2Connections = true
-        };
-
-        var channelOptions = new GrpcChannelOptions { HttpHandler = httpHandler };
-        var channel = GrpcChannel.ForAddress(address, channelOptions);
-
-        _client = new Inventory.InventoryClient(channel);
+        _client = client;
     }
 
     public async Task<bool> ReserveProductAsync(Guid productId, int quantity)
@@ -35,7 +22,21 @@ public class GrpcInventoryClient : IInventoryClient
         };
 
         var response = await _client.ReserveProductAsync(request);
-
         return response.Success;
+    }
+
+    public async Task<List<BenchmarkProductDto>> GetProductsBenchmarkAsync(int count)
+    {
+        var request = new GetProductsRequest { Count = count };
+        var response = await _client.GetProductsBenchmarkAsync(request);
+
+        var result = new List<BenchmarkProductDto>(response.Products.Count);
+
+        foreach (var p in response.Products)
+        {
+            result.Add(new BenchmarkProductDto(p.Id, p.Name, p.Price, p.Description));
+        }
+
+        return result;
     }
 }

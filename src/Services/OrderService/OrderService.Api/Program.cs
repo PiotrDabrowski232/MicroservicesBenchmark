@@ -32,6 +32,17 @@ var communicationProtocol = builder.Configuration["CommunicationProtocol"] ?? "g
 if (communicationProtocol.Equals("gRPC", StringComparison.OrdinalIgnoreCase))
 {
     Console.WriteLine("STARTING ORDER SERVICE WITH: gRPC PROTOCOL");
+
+    builder.Services.AddGrpcClient<OrderService.Infrastructure.Protos.Inventory.InventoryClient>(o =>
+    {
+        o.Address = new Uri(builder.Configuration["GrpcUrls:InventoryService"] ?? "http://inventory-service:5003");
+    });
+
+    builder.Services.AddGrpcClient<OrderService.Infrastructure.Protos.Payment.PaymentClient>(o =>
+    {
+        o.Address = new Uri(builder.Configuration["GrpcUrls:PaymentService"] ?? "http://payment-service:5005");
+    });
+
     builder.Services.AddScoped<IInventoryClient, GrpcInventoryClient>();
     builder.Services.AddScoped<IPaymentClient, GrpcPaymentClient>();
 }
@@ -51,7 +62,6 @@ else
         client.BaseAddress = new Uri(address);
     });
 }
-
 var serviceName = "OrderService";
 
 builder.Services.AddOpenTelemetry()

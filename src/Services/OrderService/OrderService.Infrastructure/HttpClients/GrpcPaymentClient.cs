@@ -1,7 +1,3 @@
-using Grpc.Net.Client;
-
-using Microsoft.Extensions.Configuration;
-
 using OrderService.Application.Interfaces;
 using OrderService.Infrastructure.Protos;
 
@@ -11,19 +7,9 @@ public class GrpcPaymentClient : IPaymentClient
 {
     private readonly Payment.PaymentClient _client;
 
-    public GrpcPaymentClient(IConfiguration configuration)
+    public GrpcPaymentClient(Payment.PaymentClient client)
     {
-        var address = configuration["GrpcUrls:PaymentService"] ?? "http://payment-service:5005";
-
-        var httpHandler = new SocketsHttpHandler
-        {
-            EnableMultipleHttp2Connections = true
-        };
-
-        var channelOptions = new GrpcChannelOptions { HttpHandler = httpHandler };
-        var channel = GrpcChannel.ForAddress(address, channelOptions);
-
-        _client = new Payment.PaymentClient(channel);
+        _client = client;
     }
 
     public async Task<bool> ChargeAsync(Guid orderId, decimal amount)

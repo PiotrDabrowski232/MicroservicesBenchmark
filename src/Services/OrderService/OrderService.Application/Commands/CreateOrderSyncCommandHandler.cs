@@ -4,6 +4,8 @@ using OrderService.Domain.Entities;
 
 namespace OrderService.Application.Orders.Commands;
 
+public record CreateOrderSyncCommand(Guid ProductId, int Quantity) : IRequest<Guid>;
+
 public class CreateOrderSyncCommandHandler : IRequestHandler<CreateOrderSyncCommand, Guid>
 {
     private readonly IInventoryClient _inventoryClient;
