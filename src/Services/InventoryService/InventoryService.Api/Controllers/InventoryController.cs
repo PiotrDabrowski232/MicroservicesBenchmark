@@ -1,6 +1,9 @@
-using MediatR;
-using Microsoft.AspNetCore.Mvc;
 using InventoryService.Application.Commands;
+using InventoryService.Application.Queries;
+
+using MediatR;
+
+using Microsoft.AspNetCore.Mvc;
 
 namespace InventoryService.Api.Controllers;
 
@@ -28,6 +31,14 @@ public class InventoryController : ControllerBase
         }
 
         return Ok(new { Success = true });
+    }
+
+    [HttpGet("benchmark/{count}")]
+    public async Task<IActionResult> GetProductsBenchmark(int count)
+    {
+        var query = new GetProductsBenchmarkQuery(count);
+        var products = await _mediator.Send(query);
+        return Ok(products);
     }
 }
 
