@@ -5,27 +5,33 @@ using Confluent.Kafka;
 
 using Messaging.Interfaces;
 
+using SharedKernel.Options;
+
 namespace Messaging.MessagesBuses
 {
     public class KafkaMessageBus : IMessageBus
     {
         private readonly IProducer<string, string> _producer;
         private readonly IConsumer<string, string> _consumer;
-
-        public KafkaMessageBus(string server)
+        private readonly KafkaOptions _kafkaOptions;
+        private readonly List<MessageRouteOptions> _messageRouteOptions;
+        public KafkaMessageBus(KafkaOptions kafkaOptions, List<MessageRouteOptions> messageRouteOptions)
         {
-            var producerConfig = new ProducerConfig { BootstrapServers = server };
-            _producer = new ProducerBuilder<string, string>(producerConfig).Build();
+            _kafkaOptions = kafkaOptions;
+            _messageRouteOptions = messageRouteOptions;
+
+            //var producerConfig = new ProducerConfig { BootstrapServers = server };
+            //_producer = new ProducerBuilder<string, string>(producerConfig).Build();
             var consumerConfig = new ConsumerConfig
             {
-                BootstrapServers = server,
+                //BootstrapServers = server,
                 GroupId = "order-group",
                 AutoOffsetReset = AutoOffsetReset.Earliest
             };
             _consumer = new ConsumerBuilder<string, string>(consumerConfig).Build();
         }
 
-        public async Task PublishAsync<T>(T message, string topicName, string correlationId = null)
+        public async Task PublishAsync<T>(T message, string correlationId = null, string topicName = null)
         {
             var key = correlationId ?? Guid.NewGuid().ToString();
             var value = JsonSerializer.Serialize(message);

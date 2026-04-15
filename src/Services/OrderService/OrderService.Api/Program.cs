@@ -7,7 +7,7 @@ using OpenTelemetry.Trace;
 using OrderService.Application.Interfaces;
 using OrderService.Application.Orders.Commands;
 using OrderService.Infrastructure.Data;
-using OrderService.Infrastructure.HttpClients;
+using OrderService.Infrastructure.DependencyInjection;
 using OrderService.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -27,41 +27,8 @@ builder.Services.AddMediatR(cfg =>
 
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 
-var communicationProtocol = builder.Configuration["CommunicationProtocol"] ?? "gRPC";
+builder.Services.AddOrderCommunication(builder.Configuration);
 
-if (communicationProtocol.Equals("gRPC", StringComparison.OrdinalIgnoreCase))
-{
-    Console.WriteLine("STARTING ORDER SERVICE WITH: gRPC PROTOCOL");
-
-    builder.Services.AddGrpcClient<OrderService.Infrastructure.Protos.Inventory.InventoryClient>(o =>
-    {
-        o.Address = new Uri(builder.Configuration["GrpcUrls:InventoryService"] ?? "http://inventory-service:5003");
-    });
-
-    builder.Services.AddGrpcClient<OrderService.Infrastructure.Protos.Payment.PaymentClient>(o =>
-    {
-        o.Address = new Uri(builder.Configuration["GrpcUrls:PaymentService"] ?? "http://payment-service:5005");
-    });
-
-    builder.Services.AddScoped<IInventoryClient, GrpcInventoryClient>();
-    builder.Services.AddScoped<IPaymentClient, GrpcPaymentClient>();
-}
-else
-{
-    Console.WriteLine("STARTING ORDER SERVICE WITH: REST PROTOCOL");
-
-    builder.Services.AddHttpClient<IInventoryClient, HttpInventoryClient>(client =>
-    {
-        var address = builder.Configuration["RestUrls:InventoryService"] ?? "http://inventory-service:5002";
-        client.BaseAddress = new Uri(address);
-    });
-
-    builder.Services.AddHttpClient<IPaymentClient, HttpPaymentClient>(client =>
-    {
-        var address = builder.Configuration["RestUrls:PaymentService"] ?? "http://payment-service:5004";
-        client.BaseAddress = new Uri(address);
-    });
-}
 var serviceName = "OrderService";
 
 builder.Services.AddOpenTelemetry()
@@ -69,7 +36,7 @@ builder.Services.AddOpenTelemetry()
     .WithTracing(tracing =>
     {
         tracing
-            .AddAspNetCoreInstrumentation() 
+            .AddAspNetCoreInstrumentation()
             .AddHttpClientInstrumentation()
             .AddEntityFrameworkCoreInstrumentation()
             .AddOtlpExporter(opts =>
