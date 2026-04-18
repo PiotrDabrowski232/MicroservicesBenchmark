@@ -40,6 +40,14 @@ public class InventoryController : ControllerBase
         var products = await _mediator.Send(query);
         return Ok(products);
     }
+
+    [HttpGet("transport-ping")]
+    public async Task<IActionResult> GetTransportPing()
+    {
+        var query = new GetTransportPingQuery();
+        var result = await _mediator.Send(query);
+        return Ok(result);
+    }
 }
 
 public record ReserveRequest(Guid ProductId, int Quantity);

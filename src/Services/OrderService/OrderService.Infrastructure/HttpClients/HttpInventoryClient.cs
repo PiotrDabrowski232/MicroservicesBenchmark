@@ -27,4 +27,10 @@ public class HttpInventoryClient : IInventoryClient
         var response = await _httpClient.GetFromJsonAsync<List<BenchmarkProductDto>>($"api/inventory/benchmark/{count}");
         return response ?? new List<BenchmarkProductDto>();
     }
+
+    public async Task<TransportPingDto> GetTransportPingAsync()
+    {
+        var response = await _httpClient.GetFromJsonAsync<TransportPingDto>("api/inventory/transport-ping");
+        return response ?? new TransportPingDto("null", -1);
+    }
 }

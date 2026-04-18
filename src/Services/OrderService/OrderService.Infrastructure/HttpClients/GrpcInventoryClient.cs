@@ -39,4 +39,11 @@ public class GrpcInventoryClient : IInventoryClient
 
         return result;
     }
+
+    public async Task<TransportPingDto> GetTransportPingAsync()
+    {
+        var response = await _client.GetTransportPingAsync(new TransportPingRequest());
+
+        return new TransportPingDto(response.Message, response.Value);
+    }
 }

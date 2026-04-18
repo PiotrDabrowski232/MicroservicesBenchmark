@@ -25,4 +25,13 @@ public class BenchmarkController : ControllerBase
 
         return Ok(new { TotalReceived = result.Count });
     }
+
+    [HttpGet("transport-ping")]
+    public async Task<IActionResult> TransportPing()
+    {
+        var query = new GetTransportPingQuery();
+        var result = await _mediator.Send(query);
+
+        return Ok(result);
+    }
 }

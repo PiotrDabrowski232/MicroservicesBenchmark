@@ -51,4 +51,16 @@ public class InventoryGrpcService : Inventory.InventoryBase
 
         return response;
     }
+
+    public override async Task<TransportPingResponse> GetTransportPing(TransportPingRequest request, ServerCallContext context)
+    {
+        var query = new GetTransportPingQuery();
+        var result = await _mediator.Send(query);
+
+        return new TransportPingResponse
+        {
+            Message = result.Message,
+            Value = result.Value
+        };
+    }
 }
