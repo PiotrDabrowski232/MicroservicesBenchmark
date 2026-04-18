@@ -8,6 +8,7 @@ service Inventory {
   rpc ReserveProduct (ReserveRequestMessage) returns (ReserveResponseMessage);
 
   rpc GetProductsBenchmark (GetProductsRequest) returns (GetProductsResponse);
+  rpc GetTransportPing (TransportPingRequest) returns (TransportPingResponse);
 }
 
 message ReserveRequestMessage {
@@ -33,4 +34,12 @@ message ProductDtoMessage {
 
 message GetProductsResponse {
   repeated ProductDtoMessage products = 1;
+}
+
+message TransportPingRequest {
+}
+
+message TransportPingResponse {
+  string message = 1;
+  int32 value = 2;
 }
