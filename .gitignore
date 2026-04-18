@@ -20,3 +20,4 @@ TestResults/
 *.nupkg
 .nuget/
 packages/
+.worktrees/
