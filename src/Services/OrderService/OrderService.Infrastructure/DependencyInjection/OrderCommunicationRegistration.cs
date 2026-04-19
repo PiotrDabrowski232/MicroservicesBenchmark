@@ -5,7 +5,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 using OrderService.Application.Interfaces;
 using OrderService.Infrastructure.HttpClients;
-using OrderService.Infrastructure.Orchestrators;
 
 using SharedKernel.Factory;
 using SharedKernel.Options;
@@ -44,15 +43,11 @@ namespace OrderService.Infrastructure.DependencyInjection
                 options,
                 RegisterGrpc,
                 RegisterRest);
-
-            services.AddScoped<IOrderWorkflowOrchestrator, SyncOrderWorkflowOrchestrator>();
         }
 
         private static void RegisterAsync(IServiceCollection services, CommunicationOptions options)
         {
             services.AddMessaging(options);
-
-            services.AddScoped<IOrderWorkflowOrchestrator, AsyncOrderWorkflowOrchestrator>();
         }
 
         private static void RegisterGrpc(IServiceCollection services, CommunicationOptions options)
