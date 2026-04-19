@@ -1,9 +1,14 @@
+using MediatR;
+
 using Messaging.DependencyInjection;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
+using OrderService.Application.Commands;
+using OrderService.Application.DTOs;
 using OrderService.Application.Interfaces;
+using OrderService.Application.Orders.Commands;
 using OrderService.Infrastructure.HttpClients;
 
 using SharedKernel.Factory;
@@ -43,11 +48,21 @@ namespace OrderService.Infrastructure.DependencyInjection
                 options,
                 RegisterGrpc,
                 RegisterRest);
+
+            /*
+             Reczna rejestracja handlera dla sync, bo jest tylko jeden i bym musiał w komunikacji
+             synch tworzyć messaging bo przy skanowaniu całego assembly zeskanowałby
+             by również moj asynchroniczny handler z imessagebus a bez sensu jest go tworzyć w wersji sync
+            */
+
+            services.AddTransient<IRequestHandler<CreateOrderSyncCommand, Guid>, CreateOrderSyncCommandHandler>();
         }
 
         private static void RegisterAsync(IServiceCollection services, CommunicationOptions options)
         {
             services.AddMessaging(options);
+
+            services.AddTransient<IRequestHandler<CreateOrderAsyncCommand, OrderDto>, CreateOrderAsyncCommandHandler>();
         }
 
         private static void RegisterGrpc(IServiceCollection services, CommunicationOptions options)

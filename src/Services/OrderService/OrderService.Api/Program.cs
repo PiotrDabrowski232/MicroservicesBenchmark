@@ -22,9 +22,6 @@ builder.Services.AddDbContext<OrderDbContext>(options =>
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
-builder.Services.AddMediatR(cfg =>
-    cfg.RegisterServicesFromAssembly(typeof(CreateOrderSyncCommand).Assembly));
-
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 
 builder.Services.AddOrderCommunication(builder.Configuration);
