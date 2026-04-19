@@ -17,38 +17,16 @@ namespace Messaging.MessagesBuses
         private readonly List<MessageRouteOptions> _messageRouteOptions;
         public KafkaMessageBus(KafkaOptions kafkaOptions, List<MessageRouteOptions> messageRouteOptions)
         {
-            _kafkaOptions = kafkaOptions;
-            _messageRouteOptions = messageRouteOptions;
-
-            //var producerConfig = new ProducerConfig { BootstrapServers = server };
-            //_producer = new ProducerBuilder<string, string>(producerConfig).Build();
-            var consumerConfig = new ConsumerConfig
-            {
-                //BootstrapServers = server,
-                GroupId = "order-group",
-                AutoOffsetReset = AutoOffsetReset.Earliest
-            };
-            _consumer = new ConsumerBuilder<string, string>(consumerConfig).Build();
         }
 
-        public async Task PublishAsync<T>(T message, string correlationId = null, string topicName = null)
+        public Task PublishAsync<T>(T message, CancellationToken ct)
         {
-            var key = correlationId ?? Guid.NewGuid().ToString();
-            var value = JsonSerializer.Serialize(message);
-            var headers = new Headers();
-            if (correlationId != null) headers.Add("correlation-id", Encoding.UTF8.GetBytes(correlationId));
-            await _producer.ProduceAsync(topicName, new Message<string, string> { Key = key, Value = value, Headers = headers });
+            throw new NotImplementedException();
         }
 
-        public async Task StartConsumingAsync<T>(Func<T, Task> handler)
+        public Task StartConsumingAsync<T>(Func<T, Task> handler)
         {
-            _consumer.Subscribe("responses");
-            while (true)
-            {
-                var result = _consumer.Consume();
-                var message = JsonSerializer.Deserialize<T>(result.Message.Value);
-                await handler(message);
-            }
+            throw new NotImplementedException();
         }
     }
 }

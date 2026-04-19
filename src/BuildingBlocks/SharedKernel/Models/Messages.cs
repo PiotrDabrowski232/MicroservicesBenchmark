@@ -1,28 +1,40 @@
+using SharedKernel.Enums;
+
 namespace SharedKernel.Models
 {
-    public class ReserveProductMessage
+    public abstract class BaseMessage
     {
-        public string ProductId { get; set; }
+        public Guid CorrelationId { get; set; }
+        public Guid OrderId { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    }
+
+    public class ReserveProductMessage : BaseMessage
+    {
+        public Guid ProductId { get; set; }
         public int Quantity { get; set; }
-        public string CorrelationId { get; set; }
     }
 
-    public class ProcessPaymentMessage
+    public class ProcessPaymentMessage : BaseMessage
     {
-        public string OrderId { get; set; }
         public decimal Amount { get; set; }
-        public string CorrelationId { get; set; }
     }
 
-    public class ProductReservedMessage
+    public class ProductReservedMessage : BaseMessage
     {
-        public string CorrelationId { get; set; }
-        public bool Success { get; set; }
     }
 
-    public class PaymentProcessedMessage
+    public class ProductReservationFailedMessage : BaseMessage
     {
-        public string CorrelationId { get; set; }
-        public bool Success { get; set; }
+        public string Reason { get; set; } = string.Empty;
+    }
+
+    public class PaymentProcessedMessage : BaseMessage
+    {
+    }
+
+    public class PaymentFailedMessage : BaseMessage
+    {
+        public string Reason { get; set; } = string.Empty;
     }
 }
