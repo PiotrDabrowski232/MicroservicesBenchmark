@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 using PaymentService.Application.Async.Commands;
+using PaymentService.Application.Async.Consumers;
 using PaymentService.Application.Commands;
 
 using SharedKernel.Factory;
@@ -52,6 +53,7 @@ namespace PaymentService.Infrastructure.DependencyInjection
 
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ChargeAsyncCommand).Assembly));
 
+            services.AddHostedService<ProcessPaymentConsumer>();
         }
     }
 }
