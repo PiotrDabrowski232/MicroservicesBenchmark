@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+
 using OrderService.Application.Interfaces;
 using OrderService.Domain.Entities;
 using OrderService.Infrastructure.Data;
@@ -21,5 +23,10 @@ public class OrderRepository : IOrderRepository
     public async Task SaveChangesAsync(CancellationToken cancellationToken)
     {
         await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<Order> GetOrderAsync(Guid orderID, CancellationToken cancellationToken)
+    {   
+        return await _dbContext.Orders.FirstOrDefaultAsync(x => x.Id == orderID, cancellationToken);
     }
 }

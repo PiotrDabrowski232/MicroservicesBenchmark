@@ -8,11 +8,9 @@ namespace SharedKernel.Enums
         InventoryReserved,     
         InventoryFailed,        
         
-        ProcessingPayment,      
-        PaymentCompleted,       
+        ProcessingPayment,        
         PaymentFailed,          
 
-        Completed,             
-        Cancelled
+        Completed
     }
 }
