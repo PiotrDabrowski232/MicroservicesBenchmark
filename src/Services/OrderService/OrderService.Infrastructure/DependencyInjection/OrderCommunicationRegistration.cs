@@ -3,7 +3,7 @@ using Messaging.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-using OrderService.Application.Async;
+using OrderService.Application.Async.Commands;
 using OrderService.Application.Interfaces;
 using OrderService.Application.Orders.Commands;
 using OrderService.Infrastructure.HttpClients;

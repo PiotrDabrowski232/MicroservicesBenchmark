@@ -15,7 +15,7 @@ using OrderService.Domain.Entities;
 using SharedKernel.Enums;
 using SharedKernel.Models;
 
-namespace OrderService.Application.Async
+namespace OrderService.Application.Async.Commands
 {
     public record CreateOrderAsyncCommand(Guid ProductId, int Quantity) : IRequest<OrderDto>;
 

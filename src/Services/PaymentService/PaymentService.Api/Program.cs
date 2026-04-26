@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 
 using OpenTelemetry.Metrics;
@@ -8,8 +9,8 @@ using PaymentService.Api.GrpcServices;
 using PaymentService.Application.Commands;
 using PaymentService.Application.Interfaces;
 using PaymentService.Infrastructure.Data;
+using PaymentService.Infrastructure.DependencyInjection;
 using PaymentService.Infrastructure.Repositories;
-using Microsoft.AspNetCore.Server.Kestrel.Core;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -38,8 +39,7 @@ builder.Services.AddControllers();
 builder.Services.AddGrpc();
 builder.Services.AddOpenApi();
 
-builder.Services.AddMediatR(cfg =>
-    cfg.RegisterServicesFromAssembly(typeof(ChargeCommand).Assembly));
+builder.Services.AddPaymentCommunication(builder.Configuration);
 
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 

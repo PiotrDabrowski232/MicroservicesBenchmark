@@ -2,7 +2,7 @@ using MediatR;
 
 using Microsoft.AspNetCore.Mvc;
 
-using OrderService.Application.Async;
+using OrderService.Application.Async.Commands;
 using OrderService.Application.Orders.Commands;
 
 namespace OrderService.Api.Controllers;
