@@ -8,5 +8,6 @@ namespace SharedKernel.Options
         public string? RoutingKey { get; set; }
         public string? Topic { get; set; }
         public string? ConsumerGroup { get; set; }
+        public string Exchange { get; set; } = string.Empty;
     }
 }

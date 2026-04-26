@@ -61,6 +61,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PaymentService.Api", "src\S
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrderService.Application.Async", "src\Services\OrderService\OrderService.Application.Async\OrderService.Application.Async.csproj", "{10EF0ECF-BDCA-DB88-A702-436AA981054C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InventoryService.Application.Async", "src\Services\InventoryService\InventoryService.Application.Async\InventoryService.Application.Async.csproj", "{EF3E8E40-41A8-4F8B-A3F4-029634230E0A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -131,6 +133,10 @@ Global
 		{10EF0ECF-BDCA-DB88-A702-436AA981054C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{10EF0ECF-BDCA-DB88-A702-436AA981054C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{10EF0ECF-BDCA-DB88-A702-436AA981054C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EF3E8E40-41A8-4F8B-A3F4-029634230E0A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF3E8E40-41A8-4F8B-A3F4-029634230E0A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EF3E8E40-41A8-4F8B-A3F4-029634230E0A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EF3E8E40-41A8-4F8B-A3F4-029634230E0A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -161,6 +167,7 @@ Global
 		{EC0A8BAD-FBBC-D2E6-474E-59F42CF85C3A} = {09AB6774-5772-4AB6-ACF5-349402C35214}
 		{B0CB0BAB-F1AF-8717-269A-CE892E468AAF} = {43C28630-4AB1-466D-9511-40B721960CD2}
 		{10EF0ECF-BDCA-DB88-A702-436AA981054C} = {1C17BAB3-BEAD-4E8B-9D26-0A057FFE157F}
+		{EF3E8E40-41A8-4F8B-A3F4-029634230E0A} = {09AB6774-5772-4AB6-ACF5-349402C35214}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1401BBBF-F3BF-4CCC-8EA2-F3509B593A05}

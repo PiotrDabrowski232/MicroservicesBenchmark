@@ -4,11 +4,11 @@ namespace SharedKernel.Options
 {
     public class CommunicationOptions
     {
-        public string Mode { get; set; } = "Sync"; // Sync | Async
-        public string SyncProvider { get; set; } = "Grpc"; // Grpc | Rest
-        public string AsyncProvider { get; set; } = "RabbitMQ"; // RabbitMQ | Kafka
+        public string? Mode { get; set; }// Sync | Async
+        public string? SyncProvider { get; set; }// Grpc | Rest
+        public string? AsyncProvider { get; set; } // RabbitMQ | Kafka
         public SyncEndpointsOptions Grpc { get; set; } = new();
-        public SyncEndpointsOptions Rest { get; set; } = new();
+        public SyncEndpointsOptions Rest { get; set; } = new(); 
         public MessagingOptions Messaging { get; set; } = new();
     }
 }

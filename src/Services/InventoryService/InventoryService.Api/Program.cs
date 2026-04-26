@@ -2,6 +2,7 @@ using InventoryService.Api.GrpcServices;
 using InventoryService.Application.Commands;
 using InventoryService.Application.Interfaces;
 using InventoryService.Infrastructure.Data;
+using InventoryService.Infrastructure.DependencyInjection;
 using InventoryService.Infrastructure.Repositories;
 
 using Microsoft.AspNetCore.Server.Kestrel.Core;
@@ -36,8 +37,7 @@ builder.Services.AddControllers();
 builder.Services.AddGrpc();
 builder.Services.AddOpenApi();
 
-builder.Services.AddMediatR(cfg =>
-    cfg.RegisterServicesFromAssembly(typeof(ReserveProductCommand).Assembly));
+builder.Services.AddInventoryCommunication(builder.Configuration);
 
 builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
 

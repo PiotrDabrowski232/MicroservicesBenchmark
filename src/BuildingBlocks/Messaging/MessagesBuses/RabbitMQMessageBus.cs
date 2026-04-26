@@ -13,13 +13,11 @@ namespace Messaging.MessagesBuses
     public class RabbitMQMessageBus : IMessageBus
     {
         private readonly IConnectionFactory _connectionFactory;
-        private readonly RabbitMqOptions _rabbitOptions;
         private readonly List<MessageRouteOptions> _messageRouteOptions;
         private readonly string _brokerConnectionString;
 
-        public RabbitMQMessageBus(RabbitMqOptions rabbitMqOptions, List<MessageRouteOptions> messageRouteOptions, string brokerConnectionString)
+        public RabbitMQMessageBus(List<MessageRouteOptions> messageRouteOptions, string brokerConnectionString)
         {
-            _rabbitOptions = rabbitMqOptions;
             _messageRouteOptions = messageRouteOptions;
             _brokerConnectionString = brokerConnectionString;
             _connectionFactory = new ConnectionFactory { Uri = new Uri(_brokerConnectionString) };
@@ -38,8 +36,8 @@ namespace Messaging.MessagesBuses
             using var connection = await _connectionFactory.CreateConnectionAsync(ct);
             using var channel = await connection.CreateChannelAsync();
 
-            await channel.ExchangeDeclareAsync(_rabbitOptions.Exchange, ExchangeType.Topic, durable: true, autoDelete: false, cancellationToken: ct);
-            await channel.BasicPublishAsync(exchange: _rabbitOptions.Exchange, routingKey: route.RoutingKey, mandatory: false,
+            await channel.ExchangeDeclareAsync(route.Exchange, ExchangeType.Topic, durable: true, autoDelete: false, cancellationToken: ct);
+            await channel.BasicPublishAsync(exchange: route.Exchange, routingKey: route.RoutingKey, mandatory: false,
                 basicProperties: new BasicProperties {
                     Persistent = true,
                     ContentType = "application/json",
@@ -58,9 +56,9 @@ namespace Messaging.MessagesBuses
             using var connection = await _connectionFactory.CreateConnectionAsync(ct);
             using var channel = await connection.CreateChannelAsync();
 
-            await channel.ExchangeDeclareAsync(_rabbitOptions.ResponseExchange, ExchangeType.Topic, durable: true, autoDelete: false, cancellationToken: ct);
+            await channel.ExchangeDeclareAsync(route.Exchange, ExchangeType.Topic, durable: true, autoDelete: false, cancellationToken: ct);
             await channel.QueueDeclareAsync(queue: route.Queue, durable: true, exclusive: false, autoDelete: false, cancellationToken: ct);
-            await channel.QueueBindAsync(queue: route.Queue, exchange: _rabbitOptions.ResponseExchange, routingKey: route.RoutingKey, cancellationToken: ct);
+            await channel.QueueBindAsync(queue: route.Queue, exchange: route.Exchange, routingKey: route.RoutingKey, cancellationToken: ct);
 
             var consumer = new AsyncEventingBasicConsumer(channel);
 
@@ -90,6 +88,7 @@ namespace Messaging.MessagesBuses
             };
 
             await channel.BasicConsumeAsync(queue: route.Queue, autoAck: false, consumer: consumer, cancellationToken: ct);
+            await Task.Delay(Timeout.Infinite, ct);
         }
 
         public MessageRouteOptions GetMessageRoute<T>()

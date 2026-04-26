@@ -16,8 +16,8 @@ namespace Messaging.Factories
 
             return providerName switch
             {
-                "RabbitMQ" => new RabbitMQMessageBus(providerOptions.RabbitMq, providerOptions.Routes, connection),
-                "Kafka" => new KafkaMessageBus(connection, providerOptions.Routes),
+                "RabbitMQ" => new RabbitMQMessageBus(providerOptions.Routes, connection),
+                "Kafka" => new KafkaMessageBus(providerOptions.Routes, connection),
                 _ => throw new ArgumentException("Unknown provider")
             };
         }

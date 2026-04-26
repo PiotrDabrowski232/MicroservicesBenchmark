@@ -15,7 +15,7 @@ namespace Messaging.MessagesBuses
         private readonly IConsumer<string, string> _consumer;
         private readonly string _brokerConnectionString;
         private readonly List<MessageRouteOptions> _messageRouteOptions;
-        public KafkaMessageBus(string brokerConnectionString, List<MessageRouteOptions> messageRouteOptions)
+        public KafkaMessageBus(List<MessageRouteOptions> messageRouteOptions, string brokerConnectionString)
         {
             _brokerConnectionString = brokerConnectionString;
             _messageRouteOptions = messageRouteOptions;
@@ -26,7 +26,7 @@ namespace Messaging.MessagesBuses
             throw new NotImplementedException();
         }
 
-        public Task StartConsumingAsync<T>(Func<T, Task> handler)
+        public Task StartConsumingAsync<T>(Func<T, Task> handler, CancellationToken ct)
         {
             throw new NotImplementedException();
         }

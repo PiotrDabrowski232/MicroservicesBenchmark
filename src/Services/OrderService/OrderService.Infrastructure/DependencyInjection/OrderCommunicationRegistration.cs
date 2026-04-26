@@ -38,7 +38,6 @@ namespace OrderService.Infrastructure.DependencyInjection
 
             return services;
         }
-        //dodać connectionstring do brokera w appsettings i walidację tego connectionstringa tutaj
         private static void RegisterSync(IServiceCollection services, CommunicationOptions options)
         {
             SyncCommunicationFactory.RegisterSyncCommunication(
@@ -47,7 +46,8 @@ namespace OrderService.Infrastructure.DependencyInjection
                 RegisterGrpc,
                 RegisterRest);
 
-            services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<CreateOrderSyncCommandHandler>());
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CreateOrderSyncCommand).Assembly));
+
         }
 
         private static void RegisterAsync(
@@ -62,8 +62,8 @@ namespace OrderService.Infrastructure.DependencyInjection
 
             services.AddMessaging(options, connections);
 
-            services.AddMediatR(cfg =>
-                cfg.RegisterServicesFromAssemblyContaining<CreateOrderAsyncCommandHandler>());
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CreateOrderAsyncCommand).Assembly));
+
         }
 
         private static void RegisterGrpc(IServiceCollection services, CommunicationOptions options)
