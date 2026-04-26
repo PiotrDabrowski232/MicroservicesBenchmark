@@ -1,5 +1,6 @@
 using MediatR;
 
+using Messaging.Generics;
 using Messaging.Interfaces;
 
 using Microsoft.Extensions.DependencyInjection;
@@ -11,31 +12,18 @@ using SharedKernel.Models;
 
 namespace PaymentService.Application.Async.Consumers
 {
-    public class ProcessPaymentConsumer : BackgroundService 
+    public class ProcessPaymentConsumer : GenericBackgroundService<ProcessPaymentMessage> 
     {
-        private readonly IMessageBus _messageBus;
-        private readonly IServiceScopeFactory _scopeFactory;
 
         public ProcessPaymentConsumer(
             IMessageBus messageBus,
-            IServiceScopeFactory scopeFactory)
+            IServiceScopeFactory scopeFactory) : base(messageBus, scopeFactory) { }
+
+        protected async override Task HandleMessage(ProcessPaymentMessage message, IServiceScope scope, CancellationToken ct)
         {
-            _messageBus = messageBus;
-            _scopeFactory = scopeFactory;
-        }
+            var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
 
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-        {
-            await _messageBus.StartConsumingAsync<ProcessPaymentMessage>(
-                async message =>
-                {
-                    using var scope = _scopeFactory.CreateScope();
-
-                    var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-
-                    await mediator.Send(new ChargeAsyncCommand(message.OrderId, message.Amount, message.CorrelationId), stoppingToken);
-                },
-                stoppingToken);
+            await mediator.Send(new ChargeAsyncCommand(message.OrderId, message.Amount, message.CorrelationId), ct);
         }
     }
 }

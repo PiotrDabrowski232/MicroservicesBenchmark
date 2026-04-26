@@ -1,41 +1,32 @@
 using InventoryService.Application.Async.Commands;
+using InventoryService.Application.Async.Dto;
 
 using MediatR;
 
+using Messaging.Generics;
 using Messaging.Interfaces;
 
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
 using SharedKernel.Models;
 
 namespace InventoryService.Application.Async.Consumers
 {
-    public class ReserveProductConsumer : BackgroundService
+    public class ReserveProductConsumer : GenericBackgroundService<ReserveProductMessage>
     {
-        private readonly IMessageBus _messageBus;
-        private readonly IServiceScopeFactory _scopeFactory;
 
-        public ReserveProductConsumer(
-            IMessageBus messageBus,
-            IServiceScopeFactory scopeFactory)
+        public ReserveProductConsumer(IMessageBus messageBus, IServiceScopeFactory scopeFactory) : base(messageBus, scopeFactory) { }
+
+        protected async override Task HandleMessage(ReserveProductMessage message, IServiceScope scope, CancellationToken ct)
         {
-            _messageBus = messageBus;
-            _scopeFactory = scopeFactory;
-        }
+            var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
 
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-        {
-                await _messageBus.StartConsumingAsync<ReserveProductMessage>(
-                    async message =>
-                    {
-                        using var scope = _scopeFactory.CreateScope();
-
-                        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-
-                        await mediator.Send(new ReserveProductAsyncCommand(message.ProductId, message.Quantity, new Dto.OrderDto(message.OrderId ,message.CorrelationId)), stoppingToken);
-                    },
-                    stoppingToken);
+            await mediator.Send(
+                new ReserveProductAsyncCommand(
+                    message.ProductId,
+                    message.Quantity,
+                    new OrderDto(message.OrderId, message.CorrelationId)),
+                ct);
         }
     }
 }
