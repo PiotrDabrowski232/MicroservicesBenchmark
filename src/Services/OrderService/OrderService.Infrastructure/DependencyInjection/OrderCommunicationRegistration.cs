@@ -1,12 +1,9 @@
-using MediatR;
-
 using Messaging.DependencyInjection;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-using OrderService.Application.Commands;
-using OrderService.Application.DTOs;
+using OrderService.Application.Async;
 using OrderService.Application.Interfaces;
 using OrderService.Application.Orders.Commands;
 using OrderService.Infrastructure.HttpClients;
@@ -30,17 +27,18 @@ namespace OrderService.Infrastructure.DependencyInjection
                 .Get<CommunicationOptions>()
                 ?? throw new InvalidOperationException("Communication configuration is missing.");
 
+
             services.Configure<CommunicationOptions>(configuration.GetSection("Communication"));
 
             CommunicationFactory.RegisterCommunicationFactories(
-                services,
-                options,
-                RegisterSync,
-                RegisterAsync);
+            services,
+            options,
+            RegisterSync,
+            (services, options) => RegisterAsync(services, options, configuration));
 
             return services;
         }
-
+        //dodać connectionstring do brokera w appsettings i walidację tego connectionstringa tutaj
         private static void RegisterSync(IServiceCollection services, CommunicationOptions options)
         {
             SyncCommunicationFactory.RegisterSyncCommunication(
@@ -49,20 +47,23 @@ namespace OrderService.Infrastructure.DependencyInjection
                 RegisterGrpc,
                 RegisterRest);
 
-            /*
-             Reczna rejestracja handlera dla sync, bo jest tylko jeden i bym musiał w komunikacji
-             synch tworzyć messaging bo przy skanowaniu całego assembly zeskanowałby
-             by również moj asynchroniczny handler z imessagebus a bez sensu jest go tworzyć w wersji sync
-            */
-
-            services.AddTransient<IRequestHandler<CreateOrderSyncCommand, Guid>, CreateOrderSyncCommandHandler>();
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<CreateOrderSyncCommandHandler>());
         }
 
-        private static void RegisterAsync(IServiceCollection services, CommunicationOptions options)
+        private static void RegisterAsync(
+            IServiceCollection services,
+            CommunicationOptions options,
+            IConfiguration configuration)
         {
-            services.AddMessaging(options);
+            var connections = configuration
+                .GetSection("ConnectionStrings")
+                .Get<Dictionary<string, string>>()
+                ?? throw new InvalidOperationException("Connections configuration is missing.");
 
-            services.AddTransient<IRequestHandler<CreateOrderAsyncCommand, OrderDto>, CreateOrderAsyncCommandHandler>();
+            services.AddMessaging(options, connections);
+
+            services.AddMediatR(cfg =>
+                cfg.RegisterServicesFromAssemblyContaining<CreateOrderAsyncCommandHandler>());
         }
 
         private static void RegisterGrpc(IServiceCollection services, CommunicationOptions options)

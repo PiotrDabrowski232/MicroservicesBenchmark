@@ -2,7 +2,7 @@ using MediatR;
 
 using Microsoft.AspNetCore.Mvc;
 
-using OrderService.Application.Commands;
+using OrderService.Application.Async;
 using OrderService.Application.Orders.Commands;
 
 namespace OrderService.Api.Controllers;
@@ -42,9 +42,9 @@ public class OrdersController : ControllerBase
     {
         try
         {
-            var orderId = await _mediator.Send(command);
+            var order = await _mediator.Send(command);
 
-            return Ok(new { OrderId = orderId, Status = "Sukces" });
+            return Ok(order);
         }
         catch (InvalidOperationException ex)
         {

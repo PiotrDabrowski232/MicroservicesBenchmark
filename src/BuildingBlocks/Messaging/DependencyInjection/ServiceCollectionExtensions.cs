@@ -11,25 +11,15 @@ namespace Messaging.DependencyInjection
     public static class ServiceCollectionExtensions
     {
         public static IServiceCollection AddMessaging(
-        this IServiceCollection services,
-        IConfiguration configuration)
-        {
-            var communicationOptions = configuration
-                .GetSection("Communication")
-                .Get<CommunicationOptions>()
-                ?? throw new InvalidOperationException("Communication configuration is missing.");
-
-            return services.AddMessaging(communicationOptions);
-        }
-
-        public static IServiceCollection AddMessaging(
             this IServiceCollection services,
-            CommunicationOptions communicationOptions)
+            CommunicationOptions communicationOptions,
+            Dictionary<string, string> connections)
         {
             services.AddSingleton<IMessageBus>(_ =>
                 MessageBusFactory.Create(
                     communicationOptions.AsyncProvider,
-                    communicationOptions.Messaging));
+                    communicationOptions.Messaging,
+                    connections));
 
             return services;
         }

@@ -1,18 +1,21 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
 using MediatR;
 
 using Messaging.Interfaces;
 
-using Microsoft.Extensions.Options;
-
 using OrderService.Application.DTOs;
 using OrderService.Application.Interfaces;
-using OrderService.Application.Orders.Commands;
 using OrderService.Domain.Entities;
 
 using SharedKernel.Enums;
 using SharedKernel.Models;
 
-namespace OrderService.Application.Commands
+namespace OrderService.Application.Async
 {
     public record CreateOrderAsyncCommand(Guid ProductId, int Quantity) : IRequest<OrderDto>;
 
@@ -48,10 +51,10 @@ namespace OrderService.Application.Commands
 
             await _messageBus.PublishAsync<ReserveProductMessage>(new ReserveProductMessage
             {
-                    CorrelationId = correlationId,
-                    OrderId = order.Id,
-                    ProductId = request.ProductId,
-                    Quantity = request.Quantity
+                CorrelationId = correlationId,
+                OrderId = order.Id,
+                ProductId = request.ProductId,
+                Quantity = request.Quantity
             }, cancellationToken);
 
             return new OrderDto(order.Id, order.Status);

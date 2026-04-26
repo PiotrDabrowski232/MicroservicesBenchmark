@@ -2,6 +2,6 @@ namespace Messaging.Interfaces
 {
     public interface IMessageConsumer
     {
-        Task StartConsumingAsync<T>(Func<T, Task> handler);
+        public Task StartConsumingAsync<T>(Func<T, Task> handler, CancellationToken ct);
     }
 }

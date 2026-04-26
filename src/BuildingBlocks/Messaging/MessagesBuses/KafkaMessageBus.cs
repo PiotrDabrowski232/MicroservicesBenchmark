@@ -13,10 +13,12 @@ namespace Messaging.MessagesBuses
     {
         private readonly IProducer<string, string> _producer;
         private readonly IConsumer<string, string> _consumer;
-        private readonly KafkaOptions _kafkaOptions;
+        private readonly string _brokerConnectionString;
         private readonly List<MessageRouteOptions> _messageRouteOptions;
-        public KafkaMessageBus(KafkaOptions kafkaOptions, List<MessageRouteOptions> messageRouteOptions)
+        public KafkaMessageBus(string brokerConnectionString, List<MessageRouteOptions> messageRouteOptions)
         {
+            _brokerConnectionString = brokerConnectionString;
+            _messageRouteOptions = messageRouteOptions;
         }
 
         public Task PublishAsync<T>(T message, CancellationToken ct)
