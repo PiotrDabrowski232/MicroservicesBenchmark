@@ -1,8 +1,12 @@
+using MediatR;
+
 using Messaging.Generics;
 using Messaging.Interfaces;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+
+using OrderService.Application.Async.Commands;
 
 using SharedKernel.Models;
 
@@ -14,9 +18,11 @@ namespace OrderService.Application.Async.Consumers.Payment
         {
         }
 
-        protected override Task HandleMessage(PaymentProcessedMessage message, IServiceScope scope, CancellationToken ct)
+        protected override async Task HandleMessage(PaymentProcessedMessage message, IServiceScope scope, CancellationToken ct)
         {
-            throw new NotImplementedException();
+            var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+
+            await mediator.Send(new MarkOrderAsPaymentProcessedCommand(message.OrderId), ct);
         }
     }
 }

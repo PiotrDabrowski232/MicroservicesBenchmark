@@ -28,6 +28,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{EE27783F-E7DB-4688-8CEF-62B97EBCF74B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{D4BB2C98-29EA-4081-8AB9-421C16F87659}"
+	ProjectSection(SolutionItems) = preProject
+		Products.json = Products.json
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrderService.Application", "src\Services\OrderService\OrderService.Application\OrderService.Application.csproj", "{7B3B4E95-6BA3-EA76-5197-E824424E8F5F}"
 EndProject

@@ -1,8 +1,12 @@
+using MediatR;
+
 using Messaging.Generics;
 using Messaging.Interfaces;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+
+using OrderService.Application.Async.Commands;
 
 using SharedKernel.Models;
 
@@ -12,9 +16,11 @@ namespace OrderService.Application.Async.Consumers.Reservation
     {
         public ProductReservedMessageConsumer(IMessageBus messageBus, IServiceScopeFactory scopeFactory) : base(messageBus, scopeFactory) { }
 
-        protected override Task HandleMessage(ProductReservedMessage message, IServiceScope scope, CancellationToken ct)
+        protected override async Task HandleMessage(ProductReservedMessage message, IServiceScope scope, CancellationToken ct)
         {
-            throw new NotImplementedException();
+            var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+
+            await mediator.Send(new MarkOrderAsInventoryReservedCommand(message.OrderId, message.CorrelationId), ct);
         }
     }
 }

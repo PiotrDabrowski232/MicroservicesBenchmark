@@ -4,6 +4,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 using OrderService.Application.Async.Commands;
+using OrderService.Application.Async.Consumers.Payment;
+using OrderService.Application.Async.Consumers.Reservation;
 using OrderService.Application.Interfaces;
 using OrderService.Application.Orders.Commands;
 using OrderService.Infrastructure.HttpClients;
@@ -64,6 +66,10 @@ namespace OrderService.Infrastructure.DependencyInjection
 
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CreateOrderAsyncCommand).Assembly));
 
+            services.AddHostedService<PaymentFailedMessageConsumer>();
+            services.AddHostedService<PaymentProcessedMessageConsumer>();
+            services.AddHostedService<ProductReservationFailedMessageConsumer>();
+            services.AddHostedService<ProductReservedMessageConsumer>();
         }
 
         private static void RegisterGrpc(IServiceCollection services, CommunicationOptions options)
