@@ -1,4 +1,5 @@
 using Messaging.Factories;
+using Messaging.HostedServices;
 using Messaging.Interfaces;
 
 using Microsoft.Extensions.DependencyInjection;
@@ -19,6 +20,13 @@ namespace Messaging.DependencyInjection
                     communicationOptions.AsyncProvider,
                     communicationOptions.Messaging,
                     connections));
+
+            if (communicationOptions.AsyncProvider.Equals("Kafka", StringComparison.OrdinalIgnoreCase))
+            {
+                services.AddSingleton(communicationOptions);
+                services.AddSingleton(connections);
+                services.AddHostedService<KafkaTopicInitializerHostedService>();
+            }
 
             return services;
         }

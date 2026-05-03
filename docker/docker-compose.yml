@@ -133,13 +133,16 @@ services:
       - ConnectionStrings__RabbitMq=amqp://guest:guest@rabbitmq:5672
       - ConnectionStrings__Kafka=kafka:29092
       - ConnectionStrings__DefaultConnection=Server=mysql;Port=3306;Database=OrderDb;Uid=root;Pwd=rootpassword;
-      - CommunicationProtocol=gRPC
 
-      - GrpcUrls__InventoryService=http://inventory-service:5003
-      - GrpcUrls__PaymentService=http://payment-service:5005
+      - Communication__Mode=${COMMUNICATION_MODE}
+      - Communication__SyncProvider=${SYNC_PROVIDER}
+      - Communication__AsyncProvider=${ASYNC_PROVIDER}
 
-      - RestUrls__InventoryService=http://inventory-service:5002
-      - RestUrls__PaymentService=http://payment-service:5004
+      - Communication__Grpc__InventoryService=http://inventory-service:5003
+      - Communication__Grpc__PaymentService=http://payment-service:5005
+
+      - Communication__Rest__InventoryService=http://inventory-service:5002
+      - Communication__Rest__PaymentService=http://payment-service:5004
     ports:
       - "5001:8080"
     depends_on:
@@ -163,6 +166,9 @@ services:
       - ConnectionStrings__RabbitMq=amqp://guest:guest@rabbitmq:5672
       - ConnectionStrings__Kafka=kafka:29092
       - ConnectionStrings__DefaultConnection=Server=mysql;Port=3306;Database=InventoryDb;Uid=root;Pwd=rootpassword;
+
+      - Communication__Mode=${COMMUNICATION_MODE}
+      - Communication__AsyncProvider=${ASYNC_PROVIDER}
     ports:
       - "5002:5002"
     depends_on:
@@ -183,9 +189,14 @@ services:
     container_name: payment-service
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+
       - ConnectionStrings__RabbitMq=amqp://guest:guest@rabbitmq:5672
       - ConnectionStrings__Kafka=kafka:29092
       - ConnectionStrings__DefaultConnection=Server=mysql;Port=3306;Database=PaymentDb;Uid=root;Pwd=rootpassword;
+
+      - Communication__Mode=${COMMUNICATION_MODE}
+      - Communication__AsyncProvider=${ASYNC_PROVIDER}
+
     ports:
       - "5004:5004"
     depends_on:

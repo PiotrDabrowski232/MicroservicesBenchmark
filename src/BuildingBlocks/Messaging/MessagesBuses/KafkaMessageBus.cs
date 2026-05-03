@@ -56,8 +56,6 @@ namespace Messaging.MessagesBuses
 
         public async Task StartConsumingAsync<T>(Func<T, Task> handler, CancellationToken ct)
         {
-            await Task.Yield();
-
             var route = GetMessageRoute<T>();
 
             if (route.Publisher)

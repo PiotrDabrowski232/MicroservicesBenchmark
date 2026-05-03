@@ -19,6 +19,8 @@ namespace Messaging.Generics
         }
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            await Task.Yield();
+
             await _messageBus.StartConsumingAsync<TMessage>(
                 async message =>
                 {

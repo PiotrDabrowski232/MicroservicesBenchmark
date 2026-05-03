@@ -1,7 +1,17 @@
 ### =========================
-### ORDER SERVICE - SYNC
+### ORDER SERVICE - SYNC Completed
 ### =========================
-POST http://localhost:5265/api/orders/sync
+POST http://localhost:5001/api/orders/sync
+Content-Type: application/json
+
+{
+  "productId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "quantity": 2
+}
+### =========================
+### ORDER SERVICE - SYNC Fail
+### =========================
+POST http://localhost:5001/api/orders/sync
 Content-Type: application/json
 
 {
@@ -9,11 +19,10 @@ Content-Type: application/json
   "quantity": 2
 }
 
-
 ### =========================
 ### ORDER SERVICE - ASYNC	InventoryFailed
 ### =========================
-POST http://localhost:5265/api/orders/async
+POST http://localhost:5001/api/orders/async
 Content-Type: application/json
 
 {
@@ -25,7 +34,7 @@ Content-Type: application/json
 ### =========================
 ### ORDER SERVICE - ASYNC Completed
 ### =========================
-POST http://localhost:5265/api/orders/async
+POST http://localhost:5001/api/orders/async
 Content-Type: application/json
 
 {

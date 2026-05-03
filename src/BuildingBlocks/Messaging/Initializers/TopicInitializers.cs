@@ -49,7 +49,9 @@ namespace Messaging.Initializers
             catch (CreateTopicsException ex)
             {
                 var realErrors = ex.Results
-                    .Where(x => x.Error.Code != ErrorCode.TopicAlreadyExists)
+                    .Where(x =>
+                        x.Error.Code != ErrorCode.NoError &&
+                        x.Error.Code != ErrorCode.TopicAlreadyExists)
                     .ToList();
 
                 if (realErrors.Any())
