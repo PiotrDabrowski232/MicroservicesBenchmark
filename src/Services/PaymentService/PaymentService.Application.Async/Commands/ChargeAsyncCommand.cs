@@ -26,22 +26,37 @@ namespace PaymentService.Application.Async.Commands
 
         public async Task<string> Handle(ChargeAsyncCommand request, CancellationToken cancellationToken)
         {
+            var isSuccess = Random.Shared.NextDouble() < 0.8; 
+
             var transaction = new TransactionRecord
             {
                 Id = Guid.NewGuid(),
                 OrderId = request.OrderId,
                 Amount = request.Amount,
-                Status = "Success",
+                Status = isSuccess ? "Success" : "Failed",
                 CreatedAt = DateTime.UtcNow
             };
 
             await _repository.AddTransactionAsync(transaction, cancellationToken);
             await _repository.SaveChangesAsync(cancellationToken);
 
-            await _messageBus.PublishAsync<PaymentProcessedMessage>(new PaymentProcessedMessage { 
-                OrderId = request.OrderId, 
-                CorrelationId = request.CorrelactionId 
-            }, cancellationToken);  
+            if (isSuccess)
+            {
+                await _messageBus.PublishAsync(new PaymentProcessedMessage
+                {
+                    OrderId = request.OrderId,
+                    CorrelationId = request.CorrelactionId
+                }, cancellationToken);
+            }
+            else
+            {
+                await _messageBus.PublishAsync(new PaymentFailedMessage
+                {
+                    OrderId = request.OrderId,
+                    CorrelationId = request.CorrelactionId,
+                    Reason = "Payment authorization failed"
+                }, cancellationToken);
+            }
 
             return transaction.Id.ToString();
         }
