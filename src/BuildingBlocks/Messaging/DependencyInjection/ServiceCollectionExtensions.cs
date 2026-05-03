@@ -1,7 +1,6 @@
 using Messaging.Factories;
 using Messaging.Interfaces;
 
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 using SharedKernel.Options;

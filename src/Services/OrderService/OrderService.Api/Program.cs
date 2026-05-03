@@ -1,3 +1,5 @@
+using Messaging.Factories;
+
 using Microsoft.EntityFrameworkCore;
 
 using OpenTelemetry.Metrics;
@@ -9,6 +11,8 @@ using OrderService.Application.Orders.Commands;
 using OrderService.Infrastructure.Data;
 using OrderService.Infrastructure.DependencyInjection;
 using OrderService.Infrastructure.Repositories;
+
+using SharedKernel.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -61,6 +65,24 @@ using (var scope = app.Services.CreateScope())
 
         await dbContext.Database.EnsureCreatedAsync();
         await OrderDbContextSeed.SeedAsync(dbContext);
+
+        var communicationOptions = builder.Configuration
+            .GetSection("Communication")
+            .Get<CommunicationOptions>()
+            ?? throw new InvalidOperationException("Communication options are missing.");
+
+        var connections = builder.Configuration
+            .GetSection("ConnectionStrings")
+            .Get<Dictionary<string, string>>()
+            ?? throw new InvalidOperationException("Connection strings are missing.");
+
+        if (communicationOptions.AsyncProvider.Equals("Kafka", StringComparison.OrdinalIgnoreCase))
+        {
+            await MessageBusFactory.InitializeAsync(
+                communicationOptions.AsyncProvider,
+                communicationOptions.Messaging,
+                connections);
+        }
     }
     catch (Exception ex)
     {

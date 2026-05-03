@@ -1,3 +1,5 @@
+using Messaging.Factories;
+
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,6 +13,8 @@ using PaymentService.Application.Interfaces;
 using PaymentService.Infrastructure.Data;
 using PaymentService.Infrastructure.DependencyInjection;
 using PaymentService.Infrastructure.Repositories;
+
+using SharedKernel.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -72,6 +76,24 @@ using (var scope = app.Services.CreateScope())
     {
         var dbContext = services.GetRequiredService<PaymentDbContext>();
         await dbContext.Database.EnsureCreatedAsync();
+
+        var communicationOptions = builder.Configuration
+            .GetSection("Communication")
+            .Get<CommunicationOptions>()
+            ?? throw new InvalidOperationException("Communication options are missing.");
+
+        var connections = builder.Configuration
+            .GetSection("ConnectionStrings")
+            .Get<Dictionary<string, string>>()
+            ?? throw new InvalidOperationException("Connection strings are missing.");
+
+        if (communicationOptions.AsyncProvider.Equals("Kafka", StringComparison.OrdinalIgnoreCase))
+        {
+            await MessageBusFactory.InitializeAsync(
+                communicationOptions.AsyncProvider,
+                communicationOptions.Messaging,
+                connections);
+        }
     }
     catch (Exception ex)
     {

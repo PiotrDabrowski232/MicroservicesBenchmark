@@ -5,12 +5,16 @@ using InventoryService.Infrastructure.Data;
 using InventoryService.Infrastructure.DependencyInjection;
 using InventoryService.Infrastructure.Repositories;
 
+using Messaging.Factories;
+
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+
+using SharedKernel.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.ConfigureKestrel(options =>
@@ -73,6 +77,25 @@ using (var scope = app.Services.CreateScope())
 
         var logger = services.GetRequiredService<ILogger<Program>>();
         await InventoryDbContextSeed.SeedAsync(dbContext, logger);
+
+
+        var communicationOptions = builder.Configuration
+            .GetSection("Communication")
+            .Get<CommunicationOptions>()
+            ?? throw new InvalidOperationException("Communication options are missing.");
+
+        var connections = builder.Configuration
+            .GetSection("ConnectionStrings")
+            .Get<Dictionary<string, string>>()
+            ?? throw new InvalidOperationException("Connection strings are missing.");
+
+        if (communicationOptions.AsyncProvider.Equals("Kafka", StringComparison.OrdinalIgnoreCase))
+        {
+            await MessageBusFactory.InitializeAsync(
+                communicationOptions.AsyncProvider,
+                communicationOptions.Messaging,
+                connections);
+        }
     }
     catch (Exception ex)
     {
