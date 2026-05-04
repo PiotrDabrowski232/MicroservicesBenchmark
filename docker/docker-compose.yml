@@ -32,6 +32,21 @@ services:
       - prometheus
     networks:
       - thesis-net
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.49.1
+    container_name: cadvisor
+    ports:
+      - "8082:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    privileged: true
+    networks:
+      - thesis-net
+
   mysql:
     image: mysql:8.2
     container_name: mysql-server
@@ -135,7 +150,7 @@ services:
       - ConnectionStrings__RabbitMq=amqp://guest:guest@rabbitmq:5672
       - ConnectionStrings__Kafka=kafka:29092
       - ConnectionStrings__DefaultConnection=Server=mysql;Port=3306;Database=OrderDb;Uid=root;Pwd=rootpassword;
-
+ 
       - Communication__Mode=${COMMUNICATION_MODE}
       - Communication__SyncProvider=${SYNC_PROVIDER}
       - Communication__AsyncProvider=${ASYNC_PROVIDER}
@@ -145,6 +160,7 @@ services:
 
       - Communication__Rest__InventoryService=http://inventory-service:5002
       - Communication__Rest__PaymentService=http://payment-service:5004
+
     ports:
       - "5001:8080"
     depends_on:

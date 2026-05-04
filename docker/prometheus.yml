@@ -8,8 +8,12 @@ scrape_configs:
 
   - job_name: 'inventory-service'
     static_configs:
-      - targets: ['inventory-service:8080']
+      - targets: ['inventory-service:5002']
 
   - job_name: 'payment-service'
     static_configs:
-      - targets: ['payment-service:8080']
+      - targets: ['payment-service:5004']
+
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
