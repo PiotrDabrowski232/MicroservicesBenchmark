@@ -26,6 +26,8 @@ services:
       - "3000:3000"
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - ./datasources:/etc/grafana/provisioning/datasources
     depends_on:
       - prometheus
     networks:

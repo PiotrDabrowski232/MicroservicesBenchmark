@@ -1,4 +1,8 @@
+using System.Text.Json;
+
 using InventoryService.Domain.Entities;
+
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace InventoryService.Infrastructure.Data;
@@ -7,16 +11,31 @@ public static class InventoryDbContextSeed
 {
     public static async Task SeedAsync(InventoryDbContext context, ILogger logger)
     {
-        if (!context.Products.Any())
-        {
-            var products = new List<Product>
-            {
-                new Product { Id = Guid.Parse("3fa85f64-5717-4562-b3fc-2c963f66afa6"), Name = "Test Product 1", StockQuantity = 100000 },
-                new Product { Id = Guid.NewGuid(), Name = "Test Product 2", StockQuantity = 50000 },
-            };
+        if (await context.Products.AnyAsync())
+            return;
 
-            await context.Products.AddRangeAsync(products);
-            await context.SaveChangesAsync();
+        var path = Path.Combine(AppContext.BaseDirectory, "Seed", "Products.json");
+
+        if (!File.Exists(path))
+        {
+            logger.LogWarning("Products seed file not found: {Path}", path);
+            return;
         }
+
+        var json = await File.ReadAllTextAsync(path);
+
+        var products = JsonSerializer.Deserialize<List<Product>>(json,
+            new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+        if (products is null || products.Count == 0)
+            return;
+
+        await context.Products.AddRangeAsync(products);
+        await context.SaveChangesAsync();
+
+        logger.LogInformation("Seeded {Count} products", products.Count);
     }
 }
