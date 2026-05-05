@@ -1,5 +1,8 @@
 import http from 'k6/http';
 import { check, sleep } from 'k6';
+import { createSummaryHandler } from './lib/results.js';
+
+const baseUrl = __ENV.BASE_URL || 'http://order-service:8080';
 
 export const options = {
     stages: [
@@ -12,8 +15,8 @@ export const options = {
 };
 
 export default function () {
-    const url = 'http://order-service:8080/api/orders/sync';
-    
+    const url = `${baseUrl}/api/orders/sync`;
+
     const payload = JSON.stringify({
         productId: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
         quantity: 1,
@@ -33,3 +36,5 @@ export default function () {
 
     sleep(0.1);
 }
+
+export const handleSummary = createSummaryHandler('stress-test');
