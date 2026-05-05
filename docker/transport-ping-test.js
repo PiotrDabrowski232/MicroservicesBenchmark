@@ -1,5 +1,8 @@
 import http from 'k6/http';
 import { check, sleep } from 'k6';
+import { createSummaryHandler } from './lib/results.js';
+
+const baseUrl = __ENV.BASE_URL || 'http://order-service:8080';
 
 export const options = {
     stages: [
@@ -14,7 +17,6 @@ export const options = {
 };
 
 export default function () {
-    const baseUrl = __ENV.BASE_URL || 'http://order-service:8080';
     const res = http.get(`${baseUrl}/api/benchmark/transport-ping`);
 
     check(res, {
@@ -28,3 +30,5 @@ export default function () {
 
     sleep(1);
 }
+
+export const handleSummary = createSummaryHandler('transport-ping');
