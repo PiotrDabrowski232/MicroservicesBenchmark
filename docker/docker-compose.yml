@@ -36,7 +36,7 @@ services:
       - thesis-net
 
   cadvisor:
-    image: gcr.io/cadvisor/cadvisor:v0.56.2
+    image: ghcr.io/google/cadvisor:v0.56.2
     container_name: cadvisor
     command:
       - --docker_only=true
