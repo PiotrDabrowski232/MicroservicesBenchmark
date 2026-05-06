@@ -38,4 +38,19 @@ if ($providerConfig -notmatch 'path:\s*/var/lib/grafana/dashboards') {
     throw 'Dashboard provider does not point to /var/lib/grafana/dashboards.'
 }
 
+$requestPanelTitles = @($requestDashboard.panels | ForEach-Object { $_.title })
+$expectedRequestPanels = @(
+    'Throughput per Service',
+    'Average Latency per Service',
+    'P95 Latency per Service',
+    '5xx Error Rate',
+    'Total Requests in Range'
+)
+
+foreach ($panelTitle in $expectedRequestPanels) {
+    if ($requestPanelTitles -notcontains $panelTitle) {
+        throw "Missing request dashboard panel: $panelTitle"
+    }
+}
+
 Write-Host 'Grafana dashboard provisioning files are present.'
