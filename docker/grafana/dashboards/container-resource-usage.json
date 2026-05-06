@@ -1,0 +1,14 @@
+{
+  "title": "Container Resource Usage",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "5s",
+  "panels": [],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-15m",
+    "to": "now"
+  }
+}
