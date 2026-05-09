@@ -17,7 +17,6 @@ export type RunSummary = {
   testName: string
   provider: string
   startedAt: string | null
-  path: string
   meta: Record<string, unknown>
   metrics: RunMetrics
   downloads: RunDownloads

@@ -9,7 +9,7 @@ type ParsedRun = {
   testName: string
   provider: string
   startedAt: string | null
-  path: string
+  filePath: string
   meta: Record<string, unknown>
   summary: Record<string, unknown> | null
   metrics: RunMetrics
@@ -148,7 +148,7 @@ async function readRunDirectory(runDir: RunDirectory): Promise<ParsedRun | null>
     testName: toText(meta?.testName) || testName,
     provider,
     startedAt,
-    path: runDir.runDir,
+    filePath: runDir.runDir,
     meta,
     summary,
     metrics: extractMetrics(summary),
@@ -208,7 +208,6 @@ function matchesFilters(run: RunSummary, filters?: RunFilters): boolean {
     run.testName,
     run.provider,
     run.startedAt,
-    run.path,
     JSON.stringify(run.meta ?? {})
   ]
     .join(' ')
@@ -223,7 +222,6 @@ function toSummary(run: ParsedRun): RunSummary {
     testName: run.testName,
     provider: run.provider,
     startedAt: run.startedAt,
-    path: run.path,
     meta: run.meta,
     metrics: run.metrics,
     downloads: createDownloads(run.id),
@@ -249,7 +247,7 @@ function compareMetrics(left: RunMetrics, right: RunMetrics): RunMetrics {
 }
 
 export function createResultsStore(resultsRoot: string): ResultsStore {
-  async function loadRuns(): Promise<RunSummary[]> {
+  async function loadRuns(): Promise<ParsedRun[]> {
     const directories = await discoverRunDirectories(resultsRoot)
     const parsedRuns = await Promise.all(directories.map(readRunDirectory))
 
@@ -265,10 +263,9 @@ export function createResultsStore(resultsRoot: string): ResultsStore {
 
         return right.mtimeMs - left.mtimeMs
       })
-      .map(toSummary)
   }
 
-  async function findRun(runId: string): Promise<RunSummary | null> {
+  async function findRun(runId: string): Promise<ParsedRun | null> {
     const runs = await loadRuns()
     return runs.find((run) => run.id === runId) ?? null
   }
@@ -276,11 +273,11 @@ export function createResultsStore(resultsRoot: string): ResultsStore {
   return {
     async listRuns(filters?: RunFilters) {
       const runs = await loadRuns()
-      return runs.filter((run) => matchesFilters(run, filters))
+      return runs.map(toSummary).filter((run) => matchesFilters(run, filters))
     },
 
     getRun(runId) {
-      return findRun(runId)
+      return findRun(runId).then((run) => (run ? toSummary(run) : null))
     },
 
     async compareRuns(leftId, rightId) {
@@ -292,8 +289,8 @@ export function createResultsStore(resultsRoot: string): ResultsStore {
       }
 
       return {
-        left,
-        right,
+        left: toSummary(left),
+        right: toSummary(right),
         delta: compareMetrics(left.metrics, right.metrics)
       }
     },
@@ -308,7 +305,7 @@ export function createResultsStore(resultsRoot: string): ResultsStore {
         return null
       }
 
-      return path.join(run.path, fileName)
+      return path.join(run.filePath, fileName)
     }
   }
 }
