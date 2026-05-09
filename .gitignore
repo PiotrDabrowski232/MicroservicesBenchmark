@@ -26,3 +26,4 @@ tools/benchmark-results-viewer/node_modules/
 tools/benchmark-results-viewer/dist/
 tools/benchmark-results-viewer/.vite/
 tools/benchmark-results-viewer/coverage/
+tmpInspect/
