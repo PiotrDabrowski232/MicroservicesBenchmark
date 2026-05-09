@@ -25,13 +25,14 @@ type MetricDescriptor = {
   unit: string
   fractionDigits: number
   isPercentage?: boolean
+  higherIsBetter: boolean
 }
 
 const metricDescriptors: MetricDescriptor[] = [
-  { key: 'avgLatencyMs', label: 'Avg latency', unit: 'ms', fractionDigits: 2 },
-  { key: 'p95LatencyMs', label: 'P95 latency', unit: 'ms', fractionDigits: 2 },
-  { key: 'errorRate', label: 'Error rate', unit: '%', fractionDigits: 2, isPercentage: true },
-  { key: 'requestRate', label: 'Request rate', unit: 'req/s', fractionDigits: 2 }
+  { key: 'avgLatencyMs', label: 'Avg latency', unit: 'ms', fractionDigits: 2, higherIsBetter: false },
+  { key: 'p95LatencyMs', label: 'P95 latency', unit: 'ms', fractionDigits: 2, higherIsBetter: false },
+  { key: 'errorRate', label: 'Error rate', unit: '%', fractionDigits: 2, isPercentage: true, higherIsBetter: false },
+  { key: 'requestRate', label: 'Request rate', unit: 'req/s', fractionDigits: 2, higherIsBetter: true }
 ]
 
 // Exclude error rate here because it is already emphasized in the delta cards and would skew the shared scale.
@@ -76,6 +77,15 @@ function formatDelta(
   return `${prefix}${new Intl.NumberFormat(undefined, {
     maximumFractionDigits: descriptor.fractionDigits
   }).format(value)} ${descriptor.unit}`
+}
+
+function getDeltaClassName(deltaValue: number | null, descriptor: MetricDescriptor) {
+  if (deltaValue === null || deltaValue === 0) {
+    return 'comparison-delta'
+  }
+
+  const isBetter = descriptor.higherIsBetter ? deltaValue > 0 : deltaValue < 0
+  return `comparison-delta ${isBetter ? 'is-better' : 'is-worse'}`
 }
 
 function describeRun(run: RunSummary | null) {
@@ -145,7 +155,7 @@ export function RunComparison({
               return (
                 <article className="comparison-card" key={descriptor.key}>
                   <span className="metric-label">{descriptor.label}</span>
-                  <strong className={`comparison-delta${deltaValue !== null && deltaValue > 0 ? ' is-positive' : ''}`}>
+                  <strong className={getDeltaClassName(deltaValue, descriptor)}>
                     {formatDelta(deltaValue, descriptor)}
                   </strong>
                   <div className="comparison-values">

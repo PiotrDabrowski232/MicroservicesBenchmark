@@ -305,8 +305,12 @@ a {
   color: #e7edf7;
 }
 
-.comparison-delta.is-positive {
-  color: #89b4ff;
+.comparison-delta.is-better {
+  color: #5eead4;
+}
+
+.comparison-delta.is-worse {
+  color: #ffb4b4;
 }
 
 .comparison-values {

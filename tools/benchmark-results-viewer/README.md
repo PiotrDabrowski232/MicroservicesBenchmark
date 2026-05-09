@@ -21,6 +21,7 @@ RESULTS_ROOT=${RESULTS_ROOT:-$HOME/benchmark-results} PORT=${PORT:-4173} ./scrip
 ```
 
 The script installs dependencies when needed, builds the frontend, and starts the server in production-style mode.
+The build step is intentional and happens on every startup, so a short startup delay is expected before the server begins listening.
 
 After startup, the viewer is available at:
 
