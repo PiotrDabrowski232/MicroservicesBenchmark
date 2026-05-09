@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { fetchRun, fetchRuns } from './api'
 import { RunDetail } from './components/RunDetail'
 import { RunList } from './components/RunList'
-import type { RunComparison, RunSummary } from './types'
+import type { RunSummary } from './types'
 
 export default function App() {
   const [runs, setRuns] = useState<RunSummary[]>([])
@@ -11,7 +11,6 @@ export default function App() {
   const [selectedRun, setSelectedRun] = useState<RunSummary | null>(null)
   const [compareLeftId, setCompareLeftId] = useState<string | null>(null)
   const [compareRightId, setCompareRightId] = useState<string | null>(null)
-  const [comparison, setComparison] = useState<RunComparison | null>(null)
   const [isRunsLoading, setIsRunsLoading] = useState(false)
   const [isRunLoading, setIsRunLoading] = useState(false)
   const [runsError, setRunsError] = useState<string | null>(null)
@@ -105,10 +104,6 @@ export default function App() {
     }
   }, [selectedId])
 
-  useEffect(() => {
-    setComparison(null)
-  }, [compareLeftId, compareRightId])
-
   return (
     <div className="app-shell">
       <RunList
@@ -129,7 +124,7 @@ export default function App() {
         }}
       />
 
-      <main className={`content-panel${comparison ? ' has-comparison' : ''}`}>
+      <main className="content-panel">
         <RunDetail
           run={selectedRun}
           isLoading={isRunLoading}

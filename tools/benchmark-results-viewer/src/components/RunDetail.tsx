@@ -1,4 +1,5 @@
 import type { RunSummary } from '../types'
+import { formatDateTime } from '../utils/date'
 
 type RunDetailProps = {
   run: RunSummary | null
@@ -27,22 +28,6 @@ function formatPercentage(value: number | null) {
     style: 'percent',
     maximumFractionDigits: 2
   }).format(value)}`
-}
-
-function formatStartedAt(value: string | null) {
-  if (!value) {
-    return 'Unknown start time'
-  }
-
-  const timestamp = Date.parse(value)
-  if (Number.isNaN(timestamp)) {
-    return value
-  }
-
-  return new Intl.DateTimeFormat(undefined, {
-    dateStyle: 'full',
-    timeStyle: 'medium'
-  }).format(new Date(timestamp))
 }
 
 export function RunDetail({
@@ -78,7 +63,12 @@ export function RunDetail({
           <p className="detail-subtitle">
             {run.provider.toUpperCase()} · {run.testName}
           </p>
-          <p className="detail-started-at">{formatStartedAt(run.startedAt)}</p>
+          <p className="detail-started-at">
+            {formatDateTime(run.startedAt, {
+              dateStyle: 'full',
+              timeStyle: 'medium'
+            })}
+          </p>
         </div>
 
         <div className="detail-badges">

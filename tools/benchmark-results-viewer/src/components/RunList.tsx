@@ -1,4 +1,5 @@
 import type { RunSummary } from '../types'
+import { formatDateTime } from '../utils/date'
 
 type RunListProps = {
   runs: RunSummary[]
@@ -12,22 +13,6 @@ type RunListProps = {
   onSelectRun: (id: string) => void
   onToggleCompareLeft: (id: string) => void
   onToggleCompareRight: (id: string) => void
-}
-
-function formatStartedAt(value: string | null) {
-  if (!value) {
-    return 'Unknown start time'
-  }
-
-  const timestamp = Date.parse(value)
-  if (Number.isNaN(timestamp)) {
-    return value
-  }
-
-  return new Intl.DateTimeFormat(undefined, {
-    dateStyle: 'medium',
-    timeStyle: 'short'
-  }).format(new Date(timestamp))
 }
 
 export function RunList({
@@ -62,7 +47,9 @@ export function RunList({
 
       {error ? <div className="panel-message panel-message-error">{error}</div> : null}
       {isLoading && runs.length === 0 ? <div className="panel-message">Loading runs…</div> : null}
-      {!isLoading && runs.length === 0 ? <div className="panel-message">No benchmark runs found.</div> : null}
+      {!error && !isLoading && runs.length === 0 ? (
+        <div className="panel-message">No benchmark runs found.</div>
+      ) : null}
 
       <div className="run-list">
         {runs.map((run) => {
@@ -81,7 +68,12 @@ export function RunList({
                 <span className="run-list-subtitle">
                   {run.provider.toUpperCase()} · {run.testName}
                 </span>
-                <span className="run-list-meta">{formatStartedAt(run.startedAt)}</span>
+                <span className="run-list-meta">
+                  {formatDateTime(run.startedAt, {
+                    dateStyle: 'medium',
+                    timeStyle: 'short'
+                  })}
+                </span>
               </button>
 
               <div className="compare-actions">
