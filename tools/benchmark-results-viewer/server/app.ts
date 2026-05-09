@@ -101,7 +101,14 @@ export function createApp(store: ResultsStore) {
     })
   })
 
-  app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {
+  app.use((error: unknown, req: Request, res: Response, _next: NextFunction) => {
+    console.error('Unhandled server error', {
+      method: req.method,
+      path: req.originalUrl,
+      error: error instanceof Error
+        ? { name: error.name, message: error.message, stack: error.stack }
+        : error
+    })
     res.status(500).json({ error: 'Internal server error.' })
   })
 

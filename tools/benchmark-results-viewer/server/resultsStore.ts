@@ -34,6 +34,9 @@ function asRecord(value: unknown): Record<string, unknown> | null {
   return null
 }
 
+// syncProvider is expected in meta.json for new runs.
+// For older runs we infer the provider from the run ID convention:
+// "-rest-" maps to REST, "-grpc-" maps to gRPC, otherwise "unknown".
 function normalizeProvider(value: unknown, runId: string): string {
   const fromMeta = toText(value).trim().toLowerCase()
   if (fromMeta) {
