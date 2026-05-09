@@ -1,4 +1,5 @@
 import express from 'express'
+import { existsSync } from 'fs'
 import path from 'path'
 import type { ResultsStore } from './types'
 
@@ -85,14 +86,14 @@ export function createApp(store: ResultsStore) {
   })
 
   app.get(/^(?!\/api\/).*/, (_req, res, next) => {
-    res.sendFile(indexHtml, (error) => {
-      if (error && (error as NodeJS.ErrnoException).code !== 'ENOENT') {
-        next(error)
-        return
-      }
+    if (!existsSync(indexHtml)) {
+      res.status(200).json({ message: 'Frontend not built yet.' })
+      return
+    }
 
+    res.sendFile(indexHtml, (error) => {
       if (error) {
-        res.status(404).send('Frontend not built yet.')
+        next(error)
       }
     })
   })
