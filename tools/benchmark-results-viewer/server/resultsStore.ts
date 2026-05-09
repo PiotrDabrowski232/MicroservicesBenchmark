@@ -8,9 +8,9 @@ type ParsedRun = {
   id: string
   testName: string
   provider: string
-  startedAt: string
+  startedAt: string | null
   path: string
-  meta: Record<string, unknown> | null
+  meta: Record<string, unknown>
   summary: Record<string, unknown> | null
   metrics: RunMetrics
   errors: string[]
@@ -51,7 +51,7 @@ function normalizeProvider(value: unknown, runId: string): string {
   return 'unknown'
 }
 
-function parseStartedAt(value: unknown, runId: string, mtimeMs: number): string {
+function parseStartedAt(value: unknown, runId: string): string | null {
   const raw = toText(value).trim()
   if (raw) {
     const parsed = Date.parse(raw)
@@ -69,7 +69,7 @@ function parseStartedAt(value: unknown, runId: string, mtimeMs: number): string 
     }
   }
 
-  return new Date(mtimeMs).toISOString()
+  return null
 }
 
 function toNumberOrNull(value: unknown): number | null {
@@ -138,10 +138,10 @@ async function readRunDirectory(runDir: RunDirectory): Promise<ParsedRun | null>
   const testName = path.basename(runDir.testDir)
   const metaResult = await safeReadJson(path.join(runDir.runDir, 'meta.json'))
   const summaryResult = await safeReadJson(path.join(runDir.runDir, 'summary.json'))
-  const meta = metaResult.value
+  const meta = metaResult.value ?? {}
   const summary = summaryResult.value
   const provider = normalizeProvider(meta?.syncProvider, runId)
-  const startedAt = parseStartedAt(meta?.startedAt, runId, stat.mtimeMs)
+  const startedAt = parseStartedAt(meta?.startedAt, runId)
 
   return {
     id: runId,
@@ -256,7 +256,9 @@ export function createResultsStore(resultsRoot: string): ResultsStore {
     return parsedRuns
       .filter((run): run is ParsedRun => Boolean(run))
       .sort((left, right) => {
-        const timeDiff = Date.parse(right.startedAt) - Date.parse(left.startedAt)
+        const leftTime = left.startedAt ? Date.parse(left.startedAt) : left.mtimeMs
+        const rightTime = right.startedAt ? Date.parse(right.startedAt) : right.mtimeMs
+        const timeDiff = rightTime - leftTime
         if (timeDiff !== 0) {
           return timeDiff
         }

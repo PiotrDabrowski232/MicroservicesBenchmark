@@ -16,9 +16,9 @@ export type RunSummary = {
   id: string
   testName: string
   provider: string
-  startedAt: string
+  startedAt: string | null
   path: string
-  meta: Record<string, unknown> | null
+  meta: Record<string, unknown>
   metrics: RunMetrics
   downloads: RunDownloads
   errors: string[]
