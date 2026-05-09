@@ -101,8 +101,7 @@ export function createApp(store: ResultsStore) {
   })
 
   app.use((error: unknown, _req, res, _next) => {
-    const message = error instanceof Error ? error.message : 'Unexpected server error.'
-    res.status(500).json({ error: message })
+    res.status(500).json({ error: 'Internal server error.' })
   })
 
   return app
