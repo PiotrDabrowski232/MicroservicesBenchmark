@@ -109,12 +109,13 @@ function createDownloads(runId: string): RunSummary['downloads'] {
 }
 
 async function safeReadJson(filePath: string): Promise<{ value: Record<string, unknown> | null; error: string | null }> {
+  const fileName = path.basename(filePath)
   try {
     const raw = await fs.readFile(filePath, 'utf8')
     const parsed = JSON.parse(raw)
     const value = asRecord(parsed)
     if (!value) {
-      return { value: null, error: `${path.basename(filePath)}: expected a JSON object` }
+      return { value: null, error: `${fileName} could not be parsed.` }
     }
 
     return { value, error: null }
@@ -123,8 +124,11 @@ async function safeReadJson(filePath: string): Promise<{ value: Record<string, u
       return { value: null, error: null }
     }
 
-    const message = error instanceof Error ? error.message : String(error)
-    return { value: null, error: `${path.basename(filePath)}: ${message}` }
+    if (error instanceof SyntaxError) {
+      return { value: null, error: `${fileName} could not be parsed.` }
+    }
+
+    return { value: null, error: `${fileName} could not be read.` }
   }
 }
 
