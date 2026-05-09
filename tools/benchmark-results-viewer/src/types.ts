@@ -3,6 +3,10 @@ export type RunMetrics = {
   p95LatencyMs: number | null
   errorRate: number | null
   requestRate: number | null
+  vus: number | null
+  checksRate: number | null
+  dataReceivedRate: number | null
+  dataSentRate: number | null
 }
 
 export type RunDownloads = {

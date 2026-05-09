@@ -94,6 +94,22 @@ export function RunDetail({
           <span className="metric-label">Request rate</span>
           <strong>{formatMetric(run.metrics.requestRate, 2, ' req/s')}</strong>
         </article>
+        <article className="metric-card">
+          <span className="metric-label">VUs</span>
+          <strong>{formatMetric(run.metrics.vus, 0)}</strong>
+        </article>
+        <article className="metric-card">
+          <span className="metric-label">Checks</span>
+          <strong>{formatPercentage(run.metrics.checksRate)}</strong>
+        </article>
+        <article className="metric-card">
+          <span className="metric-label">Throughput (In)</span>
+          <strong>{formatMetric(run.metrics.dataReceivedRate, 2, ' bytes/s')}</strong>
+        </article>
+        <article className="metric-card">
+          <span className="metric-label">Throughput (Out)</span>
+          <strong>{formatMetric(run.metrics.dataSentRate, 2, ' bytes/s')}</strong>
+        </article>
       </div>
 
       <div className="detail-sections">
