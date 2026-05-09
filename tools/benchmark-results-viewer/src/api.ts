@@ -1,21 +1,7 @@
 import type { RunComparison, RunSummary } from './types'
 
-function getApiBaseUrl() {
-  if (typeof window === 'undefined') {
-    return ''
-  }
-
-  const { protocol, hostname, port } = window.location
-
-  if (port === '5173') {
-    return `${protocol}//${hostname}:4173`
-  }
-
-  return ''
-}
-
 async function requestJson<T>(path: string): Promise<T> {
-  const response = await fetch(`${getApiBaseUrl()}${path}`)
+  const response = await fetch(path)
 
   if (!response.ok) {
     let message = `Request failed with status ${response.status}.`
