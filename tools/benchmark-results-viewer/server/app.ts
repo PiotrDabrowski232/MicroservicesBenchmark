@@ -1,4 +1,5 @@
 import express from 'express'
+import type { NextFunction, Request, Response } from 'express'
 import { existsSync } from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -100,7 +101,7 @@ export function createApp(store: ResultsStore) {
     })
   })
 
-  app.use((error: unknown, _req, res, _next) => {
+  app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {
     res.status(500).json({ error: 'Internal server error.' })
   })
 
