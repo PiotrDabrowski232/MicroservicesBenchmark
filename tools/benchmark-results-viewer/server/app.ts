@@ -1,6 +1,6 @@
 import express from 'express'
 import type { NextFunction, Request, Response } from 'express'
-import { existsSync } from 'fs'
+import { createReadStream, existsSync, promises as fs } from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import type { ResultsStore } from './types'
@@ -66,9 +66,31 @@ export function createApp(store: ResultsStore) {
       const contentType =
         downloadName.endsWith('.json') ? 'application/json; charset=utf-8' : 'text/plain; charset=utf-8'
 
+      try {
+        await fs.access(filePath)
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+          res.status(404).json({ error: 'File not found.' })
+          return
+        }
+
+        throw error
+      }
+
       res.setHeader('Content-Disposition', `attachment; filename="${downloadName}"`)
       res.type(contentType)
-      res.sendFile(filePath)
+      const stream = createReadStream(filePath)
+      stream.on('error', (error) => {
+        if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+          if (!res.headersSent) {
+            res.status(404).json({ error: 'File not found.' })
+          }
+          return
+        }
+
+        next(error)
+      })
+      stream.pipe(res)
     } catch (error) {
       next(error)
     }

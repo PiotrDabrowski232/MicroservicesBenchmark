@@ -1,8 +1,8 @@
 import {
   Bar,
   BarChart,
+  Cell,
   CartesianGrid,
-  Legend,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -35,7 +35,7 @@ const metricDescriptors: MetricDescriptor[] = [
   { key: 'requestRate', label: 'Request rate', unit: 'req/s', fractionDigits: 2, higherIsBetter: true }
 ]
 
-// Exclude error rate here because it is already emphasized in the delta cards and would skew the shared scale.
+// Keep the chart area focused on the three direct side-by-side metrics from Task 4.
 const chartDescriptors = metricDescriptors.filter(({ key }) => key !== 'errorRate')
 
 function formatValue(
@@ -79,6 +79,16 @@ function formatDelta(
   }).format(value)} ${descriptor.unit}`
 }
 
+function formatAxisValue(
+  value: number,
+  descriptor: Pick<MetricDescriptor, 'fractionDigits' | 'isPercentage'>
+) {
+  const normalizedValue = descriptor.isPercentage ? value * 100 : value
+  return new Intl.NumberFormat(undefined, {
+    maximumFractionDigits: descriptor.fractionDigits
+  }).format(normalizedValue)
+}
+
 function getDeltaClassName(deltaValue: number | null, descriptor: MetricDescriptor) {
   if (deltaValue === null || deltaValue === 0) {
     return 'comparison-delta'
@@ -105,13 +115,6 @@ export function RunComparison({
   onCompare
 }: RunComparisonProps) {
   const hasSelection = Boolean(compareLeftRun && compareRightRun)
-  const chartData = comparison
-    ? chartDescriptors.map((descriptor) => ({
-        metric: descriptor.label,
-        left: comparison.left.metrics[descriptor.key],
-        right: comparison.right.metrics[descriptor.key]
-      }))
-    : []
 
   return (
     <section className="comparison-panel">
@@ -171,31 +174,73 @@ export function RunComparison({
             <div className="section-heading comparison-chart-heading">
               <div>
                 <h3>Metric comparison</h3>
-                <p className="comparison-note">Bars compare direct values for runs A and B.</p>
+                <p className="comparison-note">Each metric uses its own chart so ms and req/s stay on separate axes.</p>
               </div>
               <span className="comparison-legend-note">Delta cards show B − A.</span>
             </div>
 
-            <div className="comparison-chart">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={chartData} barGap={10}>
-                  <CartesianGrid stroke="rgba(137, 180, 255, 0.14)" vertical={false} />
-                  <XAxis dataKey="metric" stroke="#aab8ce" tickLine={false} axisLine={false} />
-                  <YAxis stroke="#aab8ce" tickLine={false} axisLine={false} width={72} />
-                  <Tooltip
-                    cursor={{ fill: 'rgba(137, 180, 255, 0.08)' }}
-                    contentStyle={{
-                      borderRadius: '0.85rem',
-                      border: '1px solid rgba(137, 180, 255, 0.2)',
-                      background: 'rgba(8, 20, 37, 0.96)',
-                      color: '#e7edf7'
-                    }}
-                  />
-                  <Legend />
-                  <Bar dataKey="left" name="Run A" fill="#5eead4" radius={[8, 8, 0, 0]} />
-                  <Bar dataKey="right" name="Run B" fill="#89b4ff" radius={[8, 8, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
+            <div className="comparison-chart-grid">
+              {chartDescriptors.map((descriptor) => {
+                const leftValue = comparison.left.metrics[descriptor.key]
+                const rightValue = comparison.right.metrics[descriptor.key]
+                const chartData = [
+                  { run: 'A', value: leftValue, fill: '#5eead4' },
+                  { run: 'B', value: rightValue, fill: '#89b4ff' }
+                ]
+                  .filter((entry): entry is { run: string; value: number; fill: string } => entry.value !== null)
+
+                return (
+                  <article className="comparison-mini-chart-card" key={descriptor.key}>
+                    <div className="comparison-mini-chart-header">
+                      <span className="metric-label">{descriptor.label}</span>
+                      <span className="comparison-chart-unit">{descriptor.unit}</span>
+                    </div>
+
+                    {chartData.length > 0 ? (
+                      <div className="comparison-chart comparison-chart-compact">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <BarChart data={chartData} layout="vertical" margin={{ top: 4, right: 12, left: 4, bottom: 4 }}>
+                            <CartesianGrid stroke="rgba(137, 180, 255, 0.14)" horizontal={false} />
+                            <XAxis
+                              type="number"
+                              stroke="#aab8ce"
+                              tickLine={false}
+                              axisLine={false}
+                              tickFormatter={(value) => formatAxisValue(value, descriptor)}
+                            />
+                            <YAxis
+                              type="category"
+                              dataKey="run"
+                              stroke="#aab8ce"
+                              tickLine={false}
+                              axisLine={false}
+                              width={28}
+                            />
+                            <Tooltip
+                              cursor={{ fill: 'rgba(137, 180, 255, 0.08)' }}
+                              formatter={(value: number) => formatValue(value, descriptor)}
+                              labelFormatter={(label) => `Run ${label}`}
+                              contentStyle={{
+                                borderRadius: '0.85rem',
+                                border: '1px solid rgba(137, 180, 255, 0.2)',
+                                background: 'rgba(8, 20, 37, 0.96)',
+                                color: '#e7edf7'
+                              }}
+                            />
+                            <Bar dataKey="value" radius={[0, 8, 8, 0]}>
+                              {chartData.map((entry) => (
+                                <Cell key={`${descriptor.key}-${entry.run}`} fill={entry.fill} />
+                              ))}
+                            </Bar>
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </div>
+                    ) : (
+                      <div className="panel-message comparison-chart-empty-state">No values available for this metric.</div>
+                    )}
+                  </article>
+                )
+              })}
             </div>
           </section>
         </>
