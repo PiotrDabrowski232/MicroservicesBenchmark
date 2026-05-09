@@ -34,6 +34,7 @@ const metricDescriptors: MetricDescriptor[] = [
   { key: 'requestRate', label: 'Request rate', unit: 'req/s', fractionDigits: 2 }
 ]
 
+// Exclude error rate here because it is already emphasized in the delta cards and would skew the shared scale.
 const chartDescriptors = metricDescriptors.filter(({ key }) => key !== 'errorRate')
 
 function formatValue(

@@ -14,14 +14,15 @@ export default function App() {
   const [comparison, setComparison] = useState<RunComparisonData | null>(null)
   const [compareLeftId, setCompareLeftId] = useState<string | null>(null)
   const [compareRightId, setCompareRightId] = useState<string | null>(null)
-  const [compareLeftRun, setCompareLeftRun] = useState<RunSummary | null>(null)
-  const [compareRightRun, setCompareRightRun] = useState<RunSummary | null>(null)
   const [isRunsLoading, setIsRunsLoading] = useState(false)
   const [isRunLoading, setIsRunLoading] = useState(false)
   const [isComparisonLoading, setIsComparisonLoading] = useState(false)
   const [runsError, setRunsError] = useState<string | null>(null)
   const [selectedRunError, setSelectedRunError] = useState<string | null>(null)
   const [comparisonError, setComparisonError] = useState<string | null>(null)
+
+  const compareLeftRun = compareLeftId ? runs.find((run) => run.id === compareLeftId) ?? null : null
+  const compareRightRun = compareRightId ? runs.find((run) => run.id === compareRightId) ?? null : null
 
   const resetComparison = () => {
     comparisonRequestId.current += 1
@@ -78,12 +79,6 @@ export default function App() {
 
         setRuns(nextRuns)
         setRunsError(null)
-        setCompareLeftRun((currentRun) =>
-          currentRun ? nextRuns.find((run) => run.id === currentRun.id) ?? currentRun : null
-        )
-        setCompareRightRun((currentRun) =>
-          currentRun ? nextRuns.find((run) => run.id === currentRun.id) ?? currentRun : null
-        )
         setSelectedId((currentSelectedId) => {
           if (nextRuns.length === 0) {
             return null
@@ -173,16 +168,12 @@ export default function App() {
         onSearchChange={setSearch}
         onSelectRun={setSelectedId}
         onToggleCompareLeft={(id) => {
-          const nextId = compareLeftId === id ? null : id
           resetComparison()
-          setCompareLeftId(nextId)
-          setCompareLeftRun(nextId ? runs.find((run) => run.id === nextId) ?? compareLeftRun : null)
+          setCompareLeftId((currentCompareLeftId) => (currentCompareLeftId === id ? null : id))
         }}
         onToggleCompareRight={(id) => {
-          const nextId = compareRightId === id ? null : id
           resetComparison()
-          setCompareRightId(nextId)
-          setCompareRightRun(nextId ? runs.find((run) => run.id === nextId) ?? compareRightRun : null)
+          setCompareRightId((currentCompareRightId) => (currentCompareRightId === id ? null : id))
         }}
       />
 
