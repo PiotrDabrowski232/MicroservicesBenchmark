@@ -1,6 +1,7 @@
 import express from 'express'
 import { existsSync } from 'fs'
 import path from 'path'
+import { fileURLToPath } from 'url'
 import type { ResultsStore } from './types'
 
 function readString(value: unknown): string | undefined {
@@ -9,7 +10,8 @@ function readString(value: unknown): string | undefined {
 
 export function createApp(store: ResultsStore) {
   const app = express()
-  const distDir = path.resolve(process.cwd(), 'dist')
+  const serverDir = path.dirname(fileURLToPath(import.meta.url))
+  const distDir = path.resolve(serverDir, '..', 'dist')
   const indexHtml = path.join(distDir, 'index.html')
 
   app.use(express.json())

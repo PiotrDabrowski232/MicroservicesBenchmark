@@ -284,7 +284,9 @@ export function createResultsStore(resultsRoot: string): ResultsStore {
     },
 
     async compareRuns(leftId, rightId) {
-      const [left, right] = await Promise.all([findRun(leftId), findRun(rightId)])
+      const runs = await loadRuns()
+      const left = runs.find((run) => run.id === leftId) ?? null
+      const right = runs.find((run) => run.id === rightId) ?? null
       if (!left || !right) {
         return null
       }
