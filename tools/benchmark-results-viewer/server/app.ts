@@ -9,6 +9,10 @@ function readString(value: unknown): string | undefined {
   return typeof value === 'string' && value.trim() !== '' ? value.trim() : undefined
 }
 
+function escapeContentDispositionFilename(filename: string): string {
+  return filename.replace(/["\\]/g, '\\$&').replace(/[\r\n]/g, '')
+}
+
 export function createApp(store: ResultsStore) {
   const app = express()
   const serverDir = path.dirname(fileURLToPath(import.meta.url))
@@ -77,7 +81,7 @@ export function createApp(store: ResultsStore) {
         throw error
       }
 
-      res.setHeader('Content-Disposition', `attachment; filename="${downloadName}"`)
+      res.setHeader('Content-Disposition', `attachment; filename="${escapeContentDispositionFilename(downloadName)}"`)
       res.type(contentType)
       const stream = createReadStream(filePath)
       stream.on('error', (error) => {

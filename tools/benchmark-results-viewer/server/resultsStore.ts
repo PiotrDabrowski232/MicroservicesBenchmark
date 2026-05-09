@@ -88,6 +88,11 @@ function toNumberOrNull(value: unknown): number | null {
   return null
 }
 
+function isInsideRoot(rootPath: string, candidatePath: string): boolean {
+  const relativePath = path.relative(rootPath, candidatePath)
+  return relativePath !== '' && !relativePath.startsWith('..') && !path.isAbsolute(relativePath)
+}
+
 function extractMetrics(summary: Record<string, unknown> | null): RunMetrics {
   const metrics = asRecord(summary?.metrics)
   const httpReqDuration = asRecord(metrics?.http_req_duration)
@@ -303,6 +308,8 @@ export function createResultsStore(resultsRoot: string): ResultsStore {
     },
 
     async getDownloadPath(runId, fileName) {
+      const resolvedResultsRoot = await fs.realpath(resultsRoot).catch(() => path.resolve(resultsRoot))
+
       if (!allowedDownloadFiles.has(fileName)) {
         return null
       }
@@ -312,7 +319,13 @@ export function createResultsStore(resultsRoot: string): ResultsStore {
         return null
       }
 
-      return path.join(run.filePath, fileName)
+      const downloadPath = path.join(run.filePath, fileName)
+      const resolvedDownloadPath = await fs.realpath(downloadPath).catch(() => null)
+      if (!resolvedDownloadPath || !isInsideRoot(resolvedResultsRoot, resolvedDownloadPath)) {
+        return null
+      }
+
+      return resolvedDownloadPath
     }
   }
 }
