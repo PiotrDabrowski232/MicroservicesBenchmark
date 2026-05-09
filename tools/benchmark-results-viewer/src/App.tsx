@@ -2,13 +2,14 @@ import { useEffect, useState } from 'react'
 import { fetchRun, fetchRuns } from './api'
 import { RunDetail } from './components/RunDetail'
 import { RunList } from './components/RunList'
-import type { RunSummary } from './types'
+import type { RunComparison, RunSummary } from './types'
 
 export default function App() {
   const [runs, setRuns] = useState<RunSummary[]>([])
   const [search, setSearch] = useState('')
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [selectedRun, setSelectedRun] = useState<RunSummary | null>(null)
+  const [comparison, setComparison] = useState<RunComparison | null>(null)
   const [compareLeftId, setCompareLeftId] = useState<string | null>(null)
   const [compareRightId, setCompareRightId] = useState<string | null>(null)
   const [isRunsLoading, setIsRunsLoading] = useState(false)
