@@ -94,17 +94,54 @@ function isInsideRoot(rootPath: string, candidatePath: string): boolean {
 }
 
 function extractMetrics(summary: Record<string, unknown> | null): RunMetrics {
-  const metrics = asRecord(summary?.metrics)
-  const httpReqDuration = asRecord(metrics?.http_req_duration)
-  const httpReqFailed = asRecord(metrics?.http_req_failed)
-  const httpReqs = asRecord(metrics?.http_reqs)
+  if (!summary) {
+    return {
+      avgLatencyMs: null,
+      p95LatencyMs: null,
+      errorRate: null,
+      requestRate: null,
+      vus: null,
+      checksRate: null,
+      dataReceivedRate: null,
+      dataSentRate: null
+    }
+  }
 
-  return {
+  const metrics = asRecord(summary.metrics)
+  if (!metrics) {
+    console.warn('[Storage] No "metrics" object found in summary.json')
+    return {
+      avgLatencyMs: null,
+      p95LatencyMs: null,
+      errorRate: null,
+      requestRate: null,
+      vus: null,
+      checksRate: null,
+      dataReceivedRate: null,
+      dataSentRate: null
+    }
+  }
+
+  const httpReqDuration = asRecord(asRecord(metrics.http_req_duration)?.values)
+  const httpReqFailed = asRecord(asRecord(metrics.http_req_failed)?.values)
+  const httpReqs = asRecord(asRecord(metrics.http_reqs)?.values)
+  const vusMax = asRecord(asRecord(metrics.vus_max)?.values)
+  const checks = asRecord(asRecord(metrics.checks)?.values)
+  const dataReceived = asRecord(asRecord(metrics.data_received)?.values)
+  const dataSent = asRecord(asRecord(metrics.data_sent)?.values)
+
+  const result = {
     avgLatencyMs: toNumberOrNull(httpReqDuration?.avg),
     p95LatencyMs: toNumberOrNull(httpReqDuration?.['p(95)']),
     errorRate: toNumberOrNull(httpReqFailed?.rate),
-    requestRate: toNumberOrNull(httpReqs?.rate)
+    requestRate: toNumberOrNull(httpReqs?.rate),
+    vus: toNumberOrNull(vusMax?.value),
+    checksRate: toNumberOrNull(checks?.rate),
+    dataReceivedRate: toNumberOrNull(dataReceived?.rate),
+    dataSentRate: toNumberOrNull(dataSent?.rate)
   }
+
+  return result
 }
 
 function createDownloads(runId: string): RunSummary['downloads'] {
@@ -148,12 +185,27 @@ async function readRunDirectory(runDir: RunDirectory): Promise<ParsedRun | null>
 
   const runId = path.basename(runDir.runDir)
   const testName = path.basename(runDir.testDir)
-  const metaResult = await safeReadJson(path.join(runDir.runDir, 'meta.json'))
-  const summaryResult = await safeReadJson(path.join(runDir.runDir, 'summary.json'))
+  const metaPath = path.join(runDir.runDir, 'meta.json')
+  const summaryPath = path.join(runDir.runDir, 'summary.json')
+
+  const metaResult = await safeReadJson(metaPath)
+  const summaryResult = await safeReadJson(summaryPath)
+
+  if (!summaryResult.value) {
+    console.warn(`[Storage] summary.json not found or empty for run ${runId} at ${summaryPath}`)
+  } else {
+    console.log(`[Storage] Loaded summary.json for run ${runId}`)
+  }
+
   const meta = metaResult.value ?? {}
   const summary = summaryResult.value
   const provider = normalizeProvider(meta?.syncProvider, runId)
   const startedAt = parseStartedAt(meta?.startedAt, runId)
+  const metrics = extractMetrics(summary)
+
+  if (summary && (!metrics.avgLatencyMs || !metrics.p95LatencyMs)) {
+    console.warn(`[Storage] Metrics extraction failed/incomplete for run ${runId}. Keys available in metrics:`, Object.keys(asRecord(summary.metrics) ?? {}))
+  }
 
   return {
     id: runId,
@@ -163,14 +215,18 @@ async function readRunDirectory(runDir: RunDirectory): Promise<ParsedRun | null>
     filePath: runDir.runDir,
     meta,
     summary,
-    metrics: extractMetrics(summary),
+    metrics,
     errors: [metaResult.error, summaryResult.error].filter((entry): entry is string => Boolean(entry)),
     mtimeMs: stat.mtimeMs
   }
 }
 
 async function discoverRunDirectories(resultsRoot: string): Promise<RunDirectory[]> {
-  const testDirs = await fs.readdir(resultsRoot, { withFileTypes: true }).catch(() => [])
+  console.log(`[Storage] Discovering runs in: ${resultsRoot}`)
+  const testDirs = await fs.readdir(resultsRoot, { withFileTypes: true }).catch((err) => {
+    console.error(`[Storage] Failed to read resultsRoot: ${resultsRoot}`, err)
+    return []
+  })
   const discovered: RunDirectory[] = []
 
   for (const entry of testDirs) {
@@ -180,6 +236,8 @@ async function discoverRunDirectories(resultsRoot: string): Promise<RunDirectory
 
     const testDir = path.join(resultsRoot, entry.name)
     const runDirs = await fs.readdir(testDir, { withFileTypes: true }).catch(() => [])
+    console.log(`[Storage] Found test directory: ${entry.name}, contains ${runDirs.length} entries`)
+
     for (const runEntry of runDirs) {
       if (!runEntry.isDirectory()) {
         continue
@@ -192,6 +250,7 @@ async function discoverRunDirectories(resultsRoot: string): Promise<RunDirectory
     }
   }
 
+  console.log(`[Storage] Total runs discovered: ${discovered.length}`)
   return discovered
 }
 
@@ -254,7 +313,11 @@ function compareMetrics(left: RunMetrics, right: RunMetrics): RunMetrics {
     avgLatencyMs: subtract(left.avgLatencyMs, right.avgLatencyMs),
     p95LatencyMs: subtract(left.p95LatencyMs, right.p95LatencyMs),
     errorRate: subtract(left.errorRate, right.errorRate),
-    requestRate: subtract(left.requestRate, right.requestRate)
+    requestRate: subtract(left.requestRate, right.requestRate),
+    vus: subtract(left.vus, right.vus),
+    checksRate: subtract(left.checksRate, right.checksRate),
+    dataReceivedRate: subtract(left.dataReceivedRate, right.dataReceivedRate),
+    dataSentRate: subtract(left.dataSentRate, right.dataSentRate)
   }
 }
 

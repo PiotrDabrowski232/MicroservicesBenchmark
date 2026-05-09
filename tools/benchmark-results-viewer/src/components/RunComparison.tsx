@@ -32,7 +32,11 @@ const metricDescriptors: MetricDescriptor[] = [
   { key: 'avgLatencyMs', label: 'Avg latency', unit: 'ms', fractionDigits: 2, higherIsBetter: false },
   { key: 'p95LatencyMs', label: 'P95 latency', unit: 'ms', fractionDigits: 2, higherIsBetter: false },
   { key: 'errorRate', label: 'Error rate', unit: '%', fractionDigits: 2, isPercentage: true, higherIsBetter: false },
-  { key: 'requestRate', label: 'Request rate', unit: 'req/s', fractionDigits: 2, higherIsBetter: true }
+  { key: 'requestRate', label: 'Request rate', unit: 'req/s', fractionDigits: 2, higherIsBetter: true },
+  { key: 'vus', label: 'VUs', unit: '', fractionDigits: 0, higherIsBetter: true },
+  { key: 'checksRate', label: 'Checks', unit: '%', fractionDigits: 2, isPercentage: true, higherIsBetter: true },
+  { key: 'dataReceivedRate', label: 'Throughput (In)', unit: 'bytes/s', fractionDigits: 2, higherIsBetter: true },
+  { key: 'dataSentRate', label: 'Throughput (Out)', unit: 'bytes/s', fractionDigits: 2, higherIsBetter: true }
 ]
 
 // Keep the chart area focused on the three direct side-by-side metrics from Task 4.
