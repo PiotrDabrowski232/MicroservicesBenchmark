@@ -8,8 +8,11 @@ namespace Messaging.Factories
 {
     public static class MessageBusFactory
     {
-        public static IMessageBus Create(string providerName, MessagingOptions providerOptions, Dictionary<string, string> connections)
+        public static IMessageBus Create(CommunicationOptions communicationOptions, Dictionary<string, string> connections)
         {
+            var providerName = communicationOptions.AsyncProvider;
+            var providerOptions = communicationOptions.Messaging;
+
             string connection = connections.Where(x => x.Key.Equals(providerName, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(x.Value))
                 .Select(x => x.Value)
                 .FirstOrDefault()
