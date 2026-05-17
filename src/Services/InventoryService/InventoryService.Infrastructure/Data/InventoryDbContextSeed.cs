@@ -11,31 +11,16 @@ public static class InventoryDbContextSeed
 {
     public static async Task SeedAsync(InventoryDbContext context, ILogger logger)
     {
-        if (await context.Products.AnyAsync())
-            return;
-
-        var path = Path.Combine(AppContext.BaseDirectory, "Seed", "Products.json");
-
-        if (!File.Exists(path))
+        if (!context.Products.Any())
         {
-            logger.LogWarning("Products seed file not found: {Path}", path);
-            return;
-        }
-
-        var json = await File.ReadAllTextAsync(path);
-
-        var products = JsonSerializer.Deserialize<List<Product>>(json,
-            new JsonSerializerOptions
+            var products = new List<Product>
             {
-                PropertyNameCaseInsensitive = true
-            });
+                new Product { Id = Guid.Parse("3fa85f64-5717-4562-b3fc-2c963f66afa6"), Name = "Test Product 1", StockQuantity = 100000 },
+                new Product { Id = Guid.NewGuid(), Name = "Test Product 2", StockQuantity = 50000 },
+            };
 
-        if (products is null || products.Count == 0)
-            return;
-
-        await context.Products.AddRangeAsync(products);
-        await context.SaveChangesAsync();
-
-        logger.LogInformation("Seeded {Count} products", products.Count);
+            await context.Products.AddRangeAsync(products);
+            await context.SaveChangesAsync();
+        }
     }
 }
