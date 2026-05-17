@@ -101,6 +101,20 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
+  lavinmq:
+    image: cloudamqp/lavinmq:latest
+    container_name: lavinmq
+    command: ["--default-user-only-loopback=false"]
+    ports:
+      - "5673:5672"
+      - "15673:15672"
+    networks:
+      - thesis-net
+    healthcheck:
+      test: ["CMD", "lavinmqctl", "status"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
   kafka:
     image: confluentinc/cp-kafka:latest
     container_name: kafka
@@ -154,9 +168,10 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__RabbitMq=amqp://guest:guest@rabbitmq:5672
+      - ConnectionStrings__LavinMq=amqp://guest:guest@lavinmq:5672
       - ConnectionStrings__Kafka=kafka:29092
       - ConnectionStrings__DefaultConnection=Server=mysql;Port=3306;Database=OrderDb;Uid=root;Pwd=rootpassword;
- 
+
       - Communication__Mode=${COMMUNICATION_MODE}
       - Communication__SyncProvider=${SYNC_PROVIDER}
       - Communication__AsyncProvider=${ASYNC_PROVIDER}
@@ -171,6 +186,8 @@ services:
       - "5001:8080"
     depends_on:
       rabbitmq:
+        condition: service_healthy
+      lavinmq:
         condition: service_healthy
       kafka:
         condition: service_healthy
@@ -188,6 +205,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__RabbitMq=amqp://guest:guest@rabbitmq:5672
+      - ConnectionStrings__LavinMq=amqp://guest:guest@lavinmq:5672
       - ConnectionStrings__Kafka=kafka:29092
       - ConnectionStrings__DefaultConnection=Server=mysql;Port=3306;Database=InventoryDb;Uid=root;Pwd=rootpassword;
 
@@ -197,6 +215,8 @@ services:
       - "5002:5002"
     depends_on:
       rabbitmq:
+        condition: service_healthy
+      lavinmq:
         condition: service_healthy
       kafka:
         condition: service_healthy
@@ -215,6 +235,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
 
       - ConnectionStrings__RabbitMq=amqp://guest:guest@rabbitmq:5672
+      - ConnectionStrings__LavinMq=amqp://guest:guest@lavinmq:5672
       - ConnectionStrings__Kafka=kafka:29092
       - ConnectionStrings__DefaultConnection=Server=mysql;Port=3306;Database=PaymentDb;Uid=root;Pwd=rootpassword;
 
@@ -225,6 +246,8 @@ services:
       - "5004:5004"
     depends_on:
       rabbitmq:
+        condition: service_healthy
+      lavinmq:
         condition: service_healthy
       kafka:
         condition: service_healthy

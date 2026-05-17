@@ -17,8 +17,7 @@ namespace Messaging.DependencyInjection
         {
             services.AddSingleton<IMessageBus>(_ =>
                 MessageBusFactory.Create(
-                    communicationOptions.AsyncProvider,
-                    communicationOptions.Messaging,
+                    communicationOptions,
                     connections));
 
             if (communicationOptions.AsyncProvider.Equals("Kafka", StringComparison.OrdinalIgnoreCase))

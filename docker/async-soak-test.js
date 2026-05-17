@@ -1,6 +1,7 @@
-import http from 'k6/http';
+import { createSummaryHandler } from './lib/results.js';
+import { submitOrder, waitForTerminalOrderStatus } from './async-order-common.js';
 
-import { baseUrl, buildPayload, checkAcceptedResponse, params } from './async-order-common.js';
+const terminalLatencyThresholdMs = Number(__ENV.ORDER_TERMINAL_P95_MS || 7000);
 
 export const options = {
     scenarios: {
@@ -16,10 +17,19 @@ export const options = {
     thresholds: {
         http_req_failed: ['rate<0.02'],
         http_req_duration: ['p(95)<1200'],
+        order_acceptance_success: ['rate>0.98'],
+        order_terminal_resolution_rate: ['rate>0.99'],
+        order_status_lookup_failed: ['rate<0.01'],
+        order_terminal_latency: [`p(95)<${terminalLatencyThresholdMs}`],
     },
 };
 
 export default function () {
-    const response = http.post(`${baseUrl}/api/orders/async`, buildPayload(), params);
-    checkAcceptedResponse(response);
+    const submission = submitOrder();
+
+    if (submission.accepted) {
+        waitForTerminalOrderStatus(submission.orderId);
+    }
 }
+
+export const handleSummary = createSummaryHandler('async-soak-test');
