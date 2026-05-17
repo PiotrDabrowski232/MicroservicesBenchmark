@@ -52,6 +52,7 @@ export const params = {
         "Content-Type": "application/json",
     },
     tags: {
+        name: "POST /api/orders/async",
         endpoint: "create-order-async",
     },
 };
@@ -112,13 +113,20 @@ export function submitOrder() {
     };
 }
 
-export function waitForTerminalOrderStatus(orderId) {
+export function waitForTerminalOrderStatus(orderId, overrides = {}) {
     const startTime = Date.now();
-    const deadline = startTime + orderCompletionTimeoutMs;
+    const completionTimeoutMs = Number(
+        overrides.orderCompletionTimeoutMs || orderCompletionTimeoutMs
+    );
+    const statusPollIntervalMs = Number(
+        overrides.orderStatusPollIntervalMs || orderStatusPollIntervalMs
+    );
+    const deadline = startTime + completionTimeoutMs;
 
     while (Date.now() <= deadline) {
         const response = http.get(`${baseUrl}/api/orders/${orderId}`, {
             tags: {
+                name: "GET /api/orders/:id",
                 endpoint: "get-order-status",
             },
         });
@@ -159,7 +167,7 @@ export function waitForTerminalOrderStatus(orderId) {
             statusLookupFailureRate.add(true);
         }
 
-        sleep(orderStatusPollIntervalMs / 1000);
+        sleep(statusPollIntervalMs / 1000);
     }
 
     terminalResolutionRate.add(false);
