@@ -12,17 +12,19 @@ namespace Messaging.Factories
         {
             var providerName = communicationOptions.AsyncProvider;
             var providerOptions = communicationOptions.Messaging;
+            var normalizedProviderName = providerName?.Trim().ToLowerInvariant();
 
             string connection = connections.Where(x => x.Key.Equals(providerName, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(x.Value))
                 .Select(x => x.Value)
                 .FirstOrDefault()
                 ?? throw new InvalidOperationException($"{providerName} connection is missing.");
 
-            return providerName switch
+            return normalizedProviderName switch
             {
-                "RabbitMQ" => new RabbitMQMessageBus(providerOptions.Routes, connection),
-                "Kafka" => new KafkaMessageBus(providerOptions.Routes, connection),
-                _ => throw new ArgumentException("Unknown provider")
+                "rabbitmq" => new RabbitMQMessageBus(providerOptions.Routes, connection),
+                "lavinmq" => new LavinMQMessageBus(providerOptions.Routes, connection),
+                "kafka" => new KafkaMessageBus(providerOptions.Routes, connection),
+                _ => throw new ArgumentException($"Unknown provider '{providerName}'.")
             };
         }
         public static async Task InitializeAsync(
