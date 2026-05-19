@@ -29,18 +29,38 @@ type MetricDescriptor = {
 }
 
 const metricDescriptors: MetricDescriptor[] = [
-  { key: 'avgLatencyMs', label: 'Avg latency', unit: 'ms', fractionDigits: 2, higherIsBetter: false },
-  { key: 'p95LatencyMs', label: 'P95 latency', unit: 'ms', fractionDigits: 2, higherIsBetter: false },
-  { key: 'errorRate', label: 'Error rate', unit: '%', fractionDigits: 2, isPercentage: true, higherIsBetter: false },
+  { key: 'avgLatencyMs', label: 'HTTP avg latency', unit: 'ms', fractionDigits: 2, higherIsBetter: false },
+  { key: 'p95LatencyMs', label: 'HTTP p95 latency', unit: 'ms', fractionDigits: 2, higherIsBetter: false },
+  { key: 'acceptanceLatencyAvgMs', label: 'Acceptance avg', unit: 'ms', fractionDigits: 2, higherIsBetter: false },
+  { key: 'acceptanceLatencyP95Ms', label: 'Acceptance p95', unit: 'ms', fractionDigits: 2, higherIsBetter: false },
+  { key: 'terminalLatencyAvgMs', label: 'Terminal avg', unit: 'ms', fractionDigits: 2, higherIsBetter: false },
+  { key: 'terminalLatencyP95Ms', label: 'Terminal p95', unit: 'ms', fractionDigits: 2, higherIsBetter: false },
+  { key: 'terminalResolutionRate', label: 'Resolution rate', unit: '%', fractionDigits: 2, isPercentage: true, higherIsBetter: true },
+  { key: 'businessSuccessRate', label: 'Business success', unit: '%', fractionDigits: 2, isPercentage: true, higherIsBetter: true },
+  { key: 'errorRate', label: 'HTTP error rate', unit: '%', fractionDigits: 2, isPercentage: true, higherIsBetter: false },
   { key: 'requestRate', label: 'Request rate', unit: 'req/s', fractionDigits: 2, higherIsBetter: true },
   { key: 'vus', label: 'VUs', unit: '', fractionDigits: 0, higherIsBetter: true },
   { key: 'checksRate', label: 'Checks', unit: '%', fractionDigits: 2, isPercentage: true, higherIsBetter: true },
+  { key: 'iterations', label: 'Iterations', unit: '', fractionDigits: 0, higherIsBetter: true },
+  { key: 'acceptedOrders', label: 'Accepted orders', unit: '', fractionDigits: 0, higherIsBetter: true },
+  { key: 'completedOrders', label: 'Completed orders', unit: '', fractionDigits: 0, higherIsBetter: true },
+  { key: 'inventoryFailedOrders', label: 'Inventory failed', unit: '', fractionDigits: 0, higherIsBetter: false },
+  { key: 'paymentFailedOrders', label: 'Payment failed', unit: '', fractionDigits: 0, higherIsBetter: false },
+  { key: 'unresolvedOrders', label: 'Unresolved orders', unit: '', fractionDigits: 0, higherIsBetter: false },
   { key: 'dataReceivedRate', label: 'Throughput (In)', unit: 'bytes/s', fractionDigits: 2, higherIsBetter: true },
   { key: 'dataSentRate', label: 'Throughput (Out)', unit: 'bytes/s', fractionDigits: 2, higherIsBetter: true }
 ]
 
-// Keep the chart area focused on the three direct side-by-side metrics from Task 4.
-const chartDescriptors = metricDescriptors.filter(({ key }) => key !== 'errorRate')
+const chartDescriptors = metricDescriptors.filter(({ key }) =>
+  [
+    'acceptanceLatencyAvgMs',
+    'terminalLatencyAvgMs',
+    'terminalResolutionRate',
+    'completedOrders',
+    'unresolvedOrders',
+    'requestRate'
+  ].includes(key)
+)
 
 function formatValue(
   value: number | null,

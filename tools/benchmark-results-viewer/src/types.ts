@@ -7,13 +7,24 @@ export type RunMetrics = {
   checksRate: number | null
   dataReceivedRate: number | null
   dataSentRate: number | null
+  acceptanceLatencyAvgMs: number | null
+  acceptanceLatencyP95Ms: number | null
+  terminalLatencyAvgMs: number | null
+  terminalLatencyP95Ms: number | null
+  terminalResolutionRate: number | null
+  businessSuccessRate: number | null
+  iterations: number | null
+  acceptedOrders: number | null
+  completedOrders: number | null
+  inventoryFailedOrders: number | null
+  paymentFailedOrders: number | null
+  unresolvedOrders: number | null
 }
 
-export type RunDownloads = {
-  meta: string
-  summaryJson: string
-  summaryTxt: string
-  runLog: string
+export type RunDownload = {
+  label: string
+  fileName: string
+  href: string
 }
 
 export type RunSummary = {
@@ -23,7 +34,7 @@ export type RunSummary = {
   startedAt: string | null
   meta: Record<string, unknown>
   metrics: RunMetrics
-  downloads: RunDownloads
+  downloads: RunDownload[]
   errors: string[]
 }
 

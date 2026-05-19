@@ -5,7 +5,13 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 APP_DIR="$REPO_ROOT/tools/benchmark-results-viewer"
 
-RESULTS_ROOT="${RESULTS_ROOT:-$HOME/benchmark-results}"
+if [ -z "${RESULTS_ROOT:-}" ]; then
+  if [ -d "$REPO_ROOT/RabbitMQResults" ] || [ -d "$REPO_ROOT/KafkaResults" ] || [ -d "$REPO_ROOT/LavinResults" ]; then
+    RESULTS_ROOT="$REPO_ROOT"
+  else
+    RESULTS_ROOT="$HOME/benchmark-results"
+  fi
+fi
 PORT="${PORT:-4173}"
 
 export RESULTS_ROOT

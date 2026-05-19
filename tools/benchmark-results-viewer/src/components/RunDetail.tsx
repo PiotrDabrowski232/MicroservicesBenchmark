@@ -79,15 +79,39 @@ export function RunDetail({
 
       <div className="metric-grid">
         <article className="metric-card">
-          <span className="metric-label">Avg latency</span>
+          <span className="metric-label">HTTP avg latency</span>
           <strong>{formatMetric(run.metrics.avgLatencyMs, 2, ' ms')}</strong>
         </article>
         <article className="metric-card">
-          <span className="metric-label">P95 latency</span>
+          <span className="metric-label">HTTP p95 latency</span>
           <strong>{formatMetric(run.metrics.p95LatencyMs, 2, ' ms')}</strong>
         </article>
         <article className="metric-card">
-          <span className="metric-label">Error rate</span>
+          <span className="metric-label">Acceptance avg</span>
+          <strong>{formatMetric(run.metrics.acceptanceLatencyAvgMs, 2, ' ms')}</strong>
+        </article>
+        <article className="metric-card">
+          <span className="metric-label">Acceptance p95</span>
+          <strong>{formatMetric(run.metrics.acceptanceLatencyP95Ms, 2, ' ms')}</strong>
+        </article>
+        <article className="metric-card">
+          <span className="metric-label">Terminal avg</span>
+          <strong>{formatMetric(run.metrics.terminalLatencyAvgMs, 2, ' ms')}</strong>
+        </article>
+        <article className="metric-card">
+          <span className="metric-label">Terminal p95</span>
+          <strong>{formatMetric(run.metrics.terminalLatencyP95Ms, 2, ' ms')}</strong>
+        </article>
+        <article className="metric-card">
+          <span className="metric-label">Resolution rate</span>
+          <strong>{formatPercentage(run.metrics.terminalResolutionRate)}</strong>
+        </article>
+        <article className="metric-card">
+          <span className="metric-label">Business success</span>
+          <strong>{formatPercentage(run.metrics.businessSuccessRate)}</strong>
+        </article>
+        <article className="metric-card">
+          <span className="metric-label">HTTP error rate</span>
           <strong>{formatPercentage(run.metrics.errorRate)}</strong>
         </article>
         <article className="metric-card">
@@ -101,6 +125,30 @@ export function RunDetail({
         <article className="metric-card">
           <span className="metric-label">Checks</span>
           <strong>{formatPercentage(run.metrics.checksRate)}</strong>
+        </article>
+        <article className="metric-card">
+          <span className="metric-label">Iterations</span>
+          <strong>{formatMetric(run.metrics.iterations, 0)}</strong>
+        </article>
+        <article className="metric-card">
+          <span className="metric-label">Accepted orders</span>
+          <strong>{formatMetric(run.metrics.acceptedOrders, 0)}</strong>
+        </article>
+        <article className="metric-card">
+          <span className="metric-label">Completed orders</span>
+          <strong>{formatMetric(run.metrics.completedOrders, 0)}</strong>
+        </article>
+        <article className="metric-card">
+          <span className="metric-label">Inventory failed</span>
+          <strong>{formatMetric(run.metrics.inventoryFailedOrders, 0)}</strong>
+        </article>
+        <article className="metric-card">
+          <span className="metric-label">Payment failed</span>
+          <strong>{formatMetric(run.metrics.paymentFailedOrders, 0)}</strong>
+        </article>
+        <article className="metric-card">
+          <span className="metric-label">Unresolved orders</span>
+          <strong>{formatMetric(run.metrics.unresolvedOrders, 0)}</strong>
         </article>
         <article className="metric-card">
           <span className="metric-label">Throughput (In)</span>
@@ -125,10 +173,11 @@ export function RunDetail({
             <h3>Downloads</h3>
           </div>
           <div className="download-list">
-            <a href={run.downloads.meta}>meta.json</a>
-            <a href={run.downloads.summaryJson}>summary.json</a>
-            <a href={run.downloads.summaryTxt}>summary.txt</a>
-            <a href={run.downloads.runLog}>run.log</a>
+            {run.downloads.map((download) => (
+              <a href={download.href} key={download.fileName}>
+                {download.label}
+              </a>
+            ))}
           </div>
         </section>
 
