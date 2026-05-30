@@ -1,3 +1,5 @@
+import { useRef } from 'react'
+import { toPng } from 'html-to-image'
 import {
   Bar,
   BarChart,
@@ -118,10 +120,30 @@ export function RunComparison({
   error,
   onCompare
 }: RunComparisonProps) {
+  const panelRef = useRef<HTMLElement>(null)
   const hasSelection = Boolean(compareLeftRun && compareRightRun)
 
+  const handleExportPng = async () => {
+    if (!panelRef.current || !comparison) return
+
+    try {
+      const dataUrl = await toPng(panelRef.current, {
+        backgroundColor: '#07111f',
+        style: {
+          borderRadius: '0'
+        }
+      })
+      const link = document.createElement('a')
+      link.download = `comparison-${comparison.left.id}-vs-${comparison.right.id}.png`
+      link.href = dataUrl
+      link.click()
+    } catch (err) {
+      console.error('Failed to export PNG', err)
+    }
+  }
+
   return (
-    <section className="comparison-panel">
+    <section className="comparison-panel" ref={panelRef}>
       <header className="comparison-header">
         <div>
           <p className="eyebrow">Run comparison</p>
@@ -134,9 +156,16 @@ export function RunComparison({
           </p>
         </div>
 
-        <button type="button" className="compare-submit" onClick={onCompare} disabled={!hasSelection || isLoading}>
-          {isLoading ? 'Comparing…' : 'Compare'}
-        </button>
+        <div className="comparison-actions">
+          {comparison ? (
+            <button type="button" className="export-button" onClick={handleExportPng}>
+              Export PNG
+            </button>
+          ) : null}
+          <button type="button" className="compare-submit" onClick={onCompare} disabled={!hasSelection || isLoading}>
+            {isLoading ? 'Comparing…' : 'Compare'}
+          </button>
+        </div>
       </header>
 
       {error ? <div className="panel-message panel-message-error">{error}</div> : null}

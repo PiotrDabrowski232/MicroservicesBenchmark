@@ -1,3 +1,5 @@
+import { useRef } from 'react'
+import { toPng } from 'html-to-image'
 import type { RunSummary } from '../types'
 import { formatDateTime } from '../utils/date'
 
@@ -37,6 +39,27 @@ export function RunDetail({
   isCompareLeft,
   isCompareRight
 }: RunDetailProps) {
+  const panelRef = useRef<HTMLElement>(null)
+
+  const handleExportPng = async () => {
+    if (!panelRef.current || !run) return
+
+    try {
+      const dataUrl = await toPng(panelRef.current, {
+        backgroundColor: '#07111f',
+        style: {
+          borderRadius: '0'
+        }
+      })
+      const link = document.createElement('a')
+      link.download = `run-${run.id}.png`
+      link.href = dataUrl
+      link.click()
+    } catch (err) {
+      console.error('Failed to export PNG', err)
+    }
+  }
+
   if (error) {
     return <section className="detail-panel panel-message panel-message-error">{error}</section>
   }
@@ -55,7 +78,7 @@ export function RunDetail({
   }
 
   return (
-    <section className="detail-panel">
+    <section className="detail-panel" ref={panelRef}>
       <header className="detail-header">
         <div>
           <p className="eyebrow">Run detail</p>
@@ -71,9 +94,14 @@ export function RunDetail({
           </p>
         </div>
 
-        <div className="detail-badges">
-          {isCompareLeft ? <span className="detail-badge">Compare A</span> : null}
-          {isCompareRight ? <span className="detail-badge detail-badge-secondary">Compare B</span> : null}
+        <div className="detail-actions">
+          <button type="button" className="export-button" onClick={handleExportPng}>
+            Export PNG
+          </button>
+          <div className="detail-badges">
+            {isCompareLeft ? <span className="detail-badge">Compare A</span> : null}
+            {isCompareRight ? <span className="detail-badge detail-badge-secondary">Compare B</span> : null}
+          </div>
         </div>
       </header>
 
