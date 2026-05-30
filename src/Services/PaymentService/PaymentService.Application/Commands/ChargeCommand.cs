@@ -18,7 +18,7 @@ public class ChargeCommandHandler : IRequestHandler<ChargeCommand, string>
 
     public async Task<string> Handle(ChargeCommand request, CancellationToken cancellationToken)
     {
-        await Task.Delay(300, cancellationToken);
+        await Task.Delay(10, cancellationToken);
 
         var transaction = new TransactionRecord
         {
