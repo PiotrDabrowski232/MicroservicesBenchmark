@@ -70,6 +70,7 @@ if ([string]::IsNullOrWhiteSpace($SyncProvider)) {
 $providerLabel = switch ($AsyncProvider.ToLowerInvariant()) {
     'rabbitmq' { 'RabbitMQResults' }
     'kafka' { 'KafkaResults' }
+    'lavinmq' { 'LavinResults' }
     default { 'Results' }
 }
 
