@@ -53,14 +53,18 @@
       },
       "targets": [
         {
-          "expr": "sum by (queue) (rabbitmq_queue_messages_ready{job=\"lavinmq\"})",
-          "legendFormat": "{{queue}}"
+          "expr": "lavinmq_queue_messages_ready",
+          "legendFormat": "Ready"
+        },
+        {
+          "expr": "lavinmq_queue_messages_unacked",
+          "legendFormat": "Unacked"
         }
       ]
     },
     {
       "id": 4,
-      "title": "LavinMQ — Message Rate (publish / deliver)",
+      "title": "LavinMQ — Message Rate (deliver / acknowledge)",
       "type": "timeseries",
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
       "fieldConfig": {
@@ -69,12 +73,12 @@
       },
       "targets": [
         {
-          "expr": "sum(rate(rabbitmq_channel_messages_published_total{job=\"lavinmq\"}[$__rate_interval]))",
-          "legendFormat": "Published/s"
+          "expr": "rate(lavinmq_global_messages_delivered_total[$__rate_interval])",
+          "legendFormat": "Delivered/s"
         },
         {
-          "expr": "sum(rate(rabbitmq_channel_messages_delivered_total{job=\"lavinmq\"}[$__rate_interval]))",
-          "legendFormat": "Delivered/s"
+          "expr": "rate(lavinmq_global_messages_acknowledged_total[$__rate_interval])",
+          "legendFormat": "Acknowledged/s"
         }
       ]
     },
