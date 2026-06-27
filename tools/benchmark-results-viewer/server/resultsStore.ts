@@ -210,7 +210,17 @@ async function readRunDirectory(runDir: RunDirectory): Promise<ParsedRun | null>
   const summaryPath = path.join(runDir.runDir, 'summary.json')
 
   const metaResult = await safeReadJson(metaPath)
-  const summaryResult = await safeReadJson(summaryPath)
+  let summaryResult = await safeReadJson(summaryPath)
+  let actualSummaryPath = summaryPath
+
+  if (!summaryResult.value) {
+    const altSummaryPath = path.join(runDir.testDir, `${runId}-${testName}-summary.json`)
+    const altResult = await safeReadJson(altSummaryPath)
+    if (altResult.value) {
+      summaryResult = altResult
+      actualSummaryPath = altSummaryPath
+    }
+  }
 
   if (!summaryResult.value) {
     console.warn(`[Storage] summary.json not found or empty for run ${runId} at ${summaryPath}`)
@@ -403,7 +413,18 @@ export function createResultsStore(resultsRoot: string): ResultsStore {
         return null
       }
 
-      const downloadPath = path.join(run.filePath, fileName)
+      let downloadPath = path.join(run.filePath, fileName)
+      
+      // Fallback for incorrectly placed summary files
+      if (fileName === 'summary.json' || fileName === 'summary.txt') {
+         const exists = await fs.access(downloadPath).then(() => true).catch(() => false)
+         if (!exists) {
+            const testDir = path.dirname(run.filePath)
+            const altPath = path.join(testDir, `${run.id}-${run.testName}-${fileName}`)
+            downloadPath = altPath
+         }
+      }
+
       const resolvedDownloadPath = await fs.realpath(downloadPath).catch(() => null)
       if (!resolvedDownloadPath || !isInsideRoot(resolvedResultsRoot, resolvedDownloadPath)) {
         return null
