@@ -26,6 +26,15 @@ public class BenchmarkController : ControllerBase
         return Ok(new { TotalReceived = result.Count });
     }
 
+    [HttpGet("complex-data-transfer/{count}")]
+    public async Task<IActionResult> TestComplexDataTransfer(int count)
+    {
+        var query = new GetComplexInventoryBenchmarkQuery(count);
+        var result = await _mediator.Send(query);
+
+        return Ok(new { TotalReceived = result.Count });
+    }
+
     [HttpGet("transport-ping")]
     public async Task<IActionResult> TransportPing()
     {

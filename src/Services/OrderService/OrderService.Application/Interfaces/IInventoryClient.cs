@@ -6,5 +6,6 @@ public interface IInventoryClient
 {
     Task<bool> ReserveProductAsync(Guid productId, int quantity);
     Task<List<BenchmarkProductDto>> GetProductsBenchmarkAsync(int count);
+    Task<List<BenchmarkComplexItemDto>> GetComplexPayloadBenchmarkAsync(int count);
     Task<TransportPingDto> GetTransportPingAsync();
 }

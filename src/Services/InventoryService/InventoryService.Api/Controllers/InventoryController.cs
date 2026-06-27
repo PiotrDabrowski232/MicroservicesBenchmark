@@ -41,6 +41,14 @@ public class InventoryController : ControllerBase
         return Ok(products);
     }
 
+    [HttpGet("benchmark/complex/{count}")]
+    public async Task<IActionResult> GetComplexProductsBenchmark(int count)
+    {
+        var query = new GetComplexPayloadBenchmarkQuery(count);
+        var products = await _mediator.Send(query);
+        return Ok(products);
+    }
+
     [HttpGet("transport-ping")]
     public async Task<IActionResult> GetTransportPing()
     {
