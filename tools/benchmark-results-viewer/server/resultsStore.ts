@@ -37,10 +37,15 @@ function asRecord(value: unknown): Record<string, unknown> | null {
 // syncProvider is expected in meta.json for new runs.
 // For older runs we infer the provider from the run ID convention:
 // "-rest-" maps to REST, "-grpc-" maps to gRPC, otherwise "unknown".
-function normalizeProvider(value: unknown, runId: string): string {
-  const fromMeta = toText(value).trim().toLowerCase()
-  if (fromMeta) {
-    return fromMeta
+function normalizeProvider(syncProviderVal: unknown, asyncProviderVal: unknown, runId: string): string {
+  const syncFromMeta = toText(syncProviderVal).trim().toLowerCase()
+  if (syncFromMeta) {
+    return syncFromMeta
+  }
+
+  const asyncFromMeta = toText(asyncProviderVal).trim().toLowerCase()
+  if (asyncFromMeta) {
+    return asyncFromMeta
   }
 
   if (runId.includes('-rest-')) {
@@ -123,18 +128,34 @@ function extractMetrics(summary: Record<string, unknown> | null): RunMetrics {
   }
 
   const httpReqDuration = asRecord(asRecord(metrics.http_req_duration)?.values)
+  const orderTerminalLatency = asRecord(asRecord(metrics.order_terminal_latency)?.values)
+  const iterationDuration = asRecord(asRecord(metrics.iteration_duration)?.values)
+  
+  const latencySource = orderTerminalLatency || httpReqDuration || iterationDuration
+
   const httpReqFailed = asRecord(asRecord(metrics.http_req_failed)?.values)
+  const businessSuccess = asRecord(asRecord(metrics.order_business_success_rate)?.values)
+  let errorRateVal = toNumberOrNull(httpReqFailed?.rate)
+  const businessSuccessRate = toNumberOrNull(businessSuccess?.rate)
+  if (businessSuccessRate !== null) {
+      errorRateVal = 1 - businessSuccessRate
+  }
+
   const httpReqs = asRecord(asRecord(metrics.http_reqs)?.values)
+  const iterations = asRecord(asRecord(metrics.iterations)?.values)
+  const acceptedOrders = asRecord(asRecord(metrics.orders_accepted_total)?.values)
+  const reqSource = acceptedOrders || httpReqs || iterations
+
   const vusMax = asRecord(asRecord(metrics.vus_max)?.values)
   const checks = asRecord(asRecord(metrics.checks)?.values)
   const dataReceived = asRecord(asRecord(metrics.data_received)?.values)
   const dataSent = asRecord(asRecord(metrics.data_sent)?.values)
 
   const result = {
-    avgLatencyMs: toNumberOrNull(httpReqDuration?.avg),
-    p95LatencyMs: toNumberOrNull(httpReqDuration?.['p(95)']),
-    errorRate: toNumberOrNull(httpReqFailed?.rate),
-    requestRate: toNumberOrNull(httpReqs?.rate),
+    avgLatencyMs: toNumberOrNull(latencySource?.avg),
+    p95LatencyMs: toNumberOrNull(latencySource?.['p(95)']),
+    errorRate: errorRateVal,
+    requestRate: toNumberOrNull(reqSource?.rate),
     vus: toNumberOrNull(vusMax?.value),
     checksRate: toNumberOrNull(checks?.rate),
     dataReceivedRate: toNumberOrNull(dataReceived?.rate),
@@ -199,7 +220,7 @@ async function readRunDirectory(runDir: RunDirectory): Promise<ParsedRun | null>
 
   const meta = metaResult.value ?? {}
   const summary = summaryResult.value
-  const provider = normalizeProvider(meta?.syncProvider, runId)
+  const provider = normalizeProvider(meta?.syncProvider, meta?.asyncProvider, runId)
   const startedAt = parseStartedAt(meta?.startedAt, runId)
   const metrics = extractMetrics(summary)
 
