@@ -214,11 +214,17 @@ async function readRunDirectory(runDir: RunDirectory): Promise<ParsedRun | null>
   let actualSummaryPath = summaryPath
 
   if (!summaryResult.value) {
-    const altSummaryPath = path.join(runDir.testDir, `${runId}-${testName}-summary.json`)
-    const altResult = await safeReadJson(altSummaryPath)
-    if (altResult.value) {
-      summaryResult = altResult
-      actualSummaryPath = altSummaryPath
+    // Search the test directory for a summary JSON that starts with runId
+    const testDirFiles = await fs.readdir(runDir.testDir).catch(() => [])
+    const matchingFile = testDirFiles.find(f => f.startsWith(runId) && f.endsWith('summary.json'))
+    
+    if (matchingFile) {
+      const altSummaryPath = path.join(runDir.testDir, matchingFile)
+      const altResult = await safeReadJson(altSummaryPath)
+      if (altResult.value) {
+        summaryResult = altResult
+        actualSummaryPath = altSummaryPath
+      }
     }
   }
 
@@ -420,8 +426,12 @@ export function createResultsStore(resultsRoot: string): ResultsStore {
          const exists = await fs.access(downloadPath).then(() => true).catch(() => false)
          if (!exists) {
             const testDir = path.dirname(run.filePath)
-            const altPath = path.join(testDir, `${run.id}-${run.testName}-${fileName}`)
-            downloadPath = altPath
+            const testDirFiles = await fs.readdir(testDir).catch(() => [])
+            const ext = fileName === 'summary.json' ? 'summary.json' : 'summary.txt'
+            const matchingFile = testDirFiles.find(f => f.startsWith(run.id) && f.endsWith(ext))
+            if (matchingFile) {
+               downloadPath = path.join(testDir, matchingFile)
+            }
          }
       }
 
