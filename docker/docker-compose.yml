@@ -188,10 +188,10 @@ services:
       - Communication__SyncProvider=${SYNC_PROVIDER}
       - Communication__AsyncProvider=${ASYNC_PROVIDER}
 
-      - Communication__Grpc__InventoryService=http://inventory-service:5003
+      - Communication__Grpc__InventoryService=http://api-gateway:8080
       - Communication__Grpc__PaymentService=http://payment-service:5005
 
-      - Communication__Rest__InventoryService=http://inventory-service:5002
+      - Communication__Rest__InventoryService=http://api-gateway:80
       - Communication__Rest__PaymentService=http://payment-service:5004
 
     ports:
@@ -265,6 +265,20 @@ services:
         condition: service_healthy
       mysql:
         condition: service_healthy
+    networks:
+      - thesis-net
+
+  api-gateway:
+    image: nginx:latest
+    container_name: api-gateway
+    ports:
+      - "80:80"
+      - "8080:8080" # grpc
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - inventory-service
+      - order-service
     networks:
       - thesis-net
 
