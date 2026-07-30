@@ -37,4 +37,17 @@ namespace SharedKernel.Models
     {
         public string Reason { get; set; } = string.Empty;
     }
+
+    public class BenchmarkPayloadItem
+    {
+        public string Id { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public double Price { get; set; }
+        public string Description { get; set; } = string.Empty;
+    }
+
+    public class BenchmarkPayloadMessage : BaseMessage
+    {
+        public List<BenchmarkPayloadItem> Products { get; set; } = new();
+    }
 }

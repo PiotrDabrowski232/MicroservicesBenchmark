@@ -54,6 +54,7 @@ namespace InventoryService.Infrastructure.DependencyInjection
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ReserveProductAsyncCommand).Assembly));
 
             services.AddHostedService<ReserveProductConsumer>();
+            services.AddHostedService<BenchmarkPayloadConsumer>();
         }
 
     }

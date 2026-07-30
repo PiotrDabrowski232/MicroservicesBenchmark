@@ -2,6 +2,7 @@ using MediatR;
 
 using Microsoft.AspNetCore.Mvc;
 
+using OrderService.Application.Async.Commands;
 using OrderService.Application.Queries;
 
 namespace OrderService.Api.Controllers;
@@ -33,5 +34,13 @@ public class BenchmarkController : ControllerBase
         var result = await _mediator.Send(query);
 
         return Ok(result);
+    }
+
+    [HttpPost("async-complex-payload/{count}")]
+    public async Task<IActionResult> PublishAsyncComplexPayload(int count)
+    {
+        var published = await _mediator.Send(new PublishBenchmarkPayloadCommand(count));
+
+        return Accepted(new { Published = published });
     }
 }
