@@ -8,7 +8,7 @@
   "panels": [
     {
       "id": 1,
-      "title": "RabbitMQ — Queue Depth (messages ready)",
+      "title": "RabbitMQ — Queue Depth (ready + unacked)",
       "type": "timeseries",
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
       "fieldConfig": {
@@ -17,8 +17,16 @@
       },
       "targets": [
         {
-          "expr": "sum by (queue) (rabbitmq_queue_messages_ready{job=\"rabbitmq\"})",
-          "legendFormat": "{{queue}}"
+          "expr": "sum(rabbitmq_queue_messages{job=\"rabbitmq\"})",
+          "legendFormat": "Total (ready + unacked)"
+        },
+        {
+          "expr": "sum(rabbitmq_queue_messages_ready{job=\"rabbitmq\"})",
+          "legendFormat": "Ready"
+        },
+        {
+          "expr": "sum(rabbitmq_queue_messages_unacked{job=\"rabbitmq\"})",
+          "legendFormat": "Unacked (in-flight)"
         }
       ]
     },
